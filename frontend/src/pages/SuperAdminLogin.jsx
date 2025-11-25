@@ -23,7 +23,7 @@ function SuperAdminLogin() {
             sessionStorage.setItem("user",JSON.stringify(user))
             // check the user is superadmin
             if (user.role === "superadmin" || user.is_superuser) {
-                navigate("/superadmindash")
+                navigate("/superadmin")
             }
         } catch (err) {
             setError("Invalid credentials")

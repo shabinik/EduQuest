@@ -31,6 +31,7 @@ class LoginView(APIView):
             httponly=True,
             secure=False,
             samesite='Lax',
+            domain="localhost",
             path='/',
             max_age= 60 * 5, #5 min
         )
@@ -41,6 +42,7 @@ class LoginView(APIView):
             httponly=True,
             secure=False,
             samesite='Lax',
+            domain="localhost",
             path='/',
             max_age= 60 * 60 * 24 * 7, # 7 days
         )

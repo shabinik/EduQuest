@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'accounts',
+    'subscription',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -60,8 +61,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",   # React
-    "http://127.0.0.1:5173",   
+    "http://localhost:5173",   # React  
 ]
 CORS_ALLOW_CREDENTIALS =True
 
@@ -69,7 +69,6 @@ ROOT_URLCONF = 'backend.urls'
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
-    "http://127.0.0.1:5173",
 ]
 
 TEMPLATES = [
@@ -154,3 +153,5 @@ REST_FRAMEWORK = {
     ),
 }
 
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
