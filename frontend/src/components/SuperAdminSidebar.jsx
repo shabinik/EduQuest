@@ -26,7 +26,7 @@ function SuperAdminSidebar() {
     });
   return (
     <aside style={{ width: 240, padding: 20, borderRight: "1px solid #eee" }}>
-      <h2 style={{ marginBottom: 12 }}>EduQuest Admin</h2>
+      <h2 style={{ marginBottom: 12 }}>EduQuest Super Admin</h2>
 
       <nav>
         <NavLink to="/superadmin" style={linkStyle} end>Dashboard</NavLink>

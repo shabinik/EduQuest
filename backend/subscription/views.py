@@ -51,17 +51,21 @@ class CreateOrderView(APIView):
         plan = get_object_or_404(SubscriptionPlan,id = plan_id,is_active = True)
 
         # Razorpay Client
-        client = razorpay.client(
+        client = razorpay.Client(
             auth = (settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
         )
 
         amount_paise = int(plan.price * 100)
         
+        # Build short Tenant
+        short_tenant = str(tenant.id)[:6]  # first 6 chars of UUID
+        timestamp = int(timezone.now().timestamp())
+        receipt = f"ord_ten{short_tenant}_p{plan.id}_{timestamp}"
         # Create Order Payload
         order_data = {
             "amount":amount_paise,
             "currency":plan.currency,
-            "reciept":f"order_{tenant.id}_{timezone.now().timestamp()}",
+            "receipt": receipt,
         }
 
         order = client.order.create(order_data)
@@ -131,8 +135,23 @@ class VerifyPaymentView(APIView):
         subscription.payment_reference = payment.razorpay_payment_id
         subscription.save()
 
+        tenant = subscription.tenant
+        tenant.status = "active"
+        tenant.save()
+
         return Response({"success":True,"message":"Payment verified"})
     
+
+class TenantSubscriptionsView(generics.ListAPIView):
+    serializer_class = SubscriptionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        tenant = getattr(user,"tenant",None)
+        if not tenant:
+            return Subscription.objects.none()
+        return Subscription.objects.filter(tenant=tenant).order_by("-start_date")
 
 
 

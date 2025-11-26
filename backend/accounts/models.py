@@ -1,6 +1,9 @@
 from django.db import models
 import uuid
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
+from datetime import timedelta
+from django.conf import settings
 
 # Create your models here.
 
@@ -14,7 +17,7 @@ class Tenant(models.Model):
         ("inactive" , "Inactive"),
         ("suspended","Suspended"),
         ("trial", "Trial")
-    ],default='trial')
+    ],default='inactive')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -45,3 +48,18 @@ class User(AbstractUser):
         if self.role == 'superadmin':
             self.tenant = None
         super().save(*args,**kwargs)
+
+
+class EmailOtp(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='otps')
+    email = models.EmailField()
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    def is_valid(self):
+        return (not self.is_used) and timezone.now() <= self.expires_at
+    
+    def __str__(self):
+        return f"{self.email} - {self.code}"

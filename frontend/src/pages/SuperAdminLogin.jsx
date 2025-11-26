@@ -19,9 +19,9 @@ function SuperAdminLogin() {
             })
             // server sets HTTP-only cookies; response body contains user
             const user = res.data.user
-            // keeping small non-sensitive user info in session Storage
+        
             sessionStorage.setItem("user",JSON.stringify(user))
-            // check the user is superadmin
+            
             if (user.role === "superadmin" || user.is_superuser) {
                 navigate("/superadmin")
             }
@@ -33,7 +33,7 @@ function SuperAdminLogin() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow w-96">
-            <h2 className="text-xl mb-4">Login</h2>
+            <h2 className="text-xl mb-4">Super Admin Login</h2>
             {error && <div className="text-red-600 mb-2">{error}</div>}
             <label>Username</label>
             <input value={username} type="text" onChange={(e) => setUsername(e.target.value)} className="w-full mb-2 p-2 border"/>

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import permissions,status
 from rest_framework.response import Response
-from .serializers import LoginSerializer,UserSerializer
+from .serializers import LoginSerializer,UserSerializer,AdminSignupSerializer,AdminVerifyEmailSerializer
 from django.conf import settings
 
 
@@ -66,5 +66,27 @@ class ProfileView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+    
+
+
+class AdminSingupView(APIView):
+    def post(self,request):
+        serializer = AdminSignupSerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message":"Signup successful. Please check your email for OTP."},
+                status = status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class AdminVerifyEmailView(APIView):
+    def post(self,request):
+        serializer = AdminVerifyEmailSerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message":"Email verified. You can now login."})
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)  
     
     
