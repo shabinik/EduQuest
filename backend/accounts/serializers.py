@@ -154,5 +154,15 @@ class AdminVerifyEmailSerializer(serializers.Serializer):
 
         
 
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required = False,write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=6)
 
+    def validate(self, data):
+        user = self.context['request'].user
+        old_password = data.get("old_password")
+        if old_password:
+            if not user.check_password(old_password):
+                raise serializers.ValidationError({"old_password": "Old password is incorrect."})
+        return data
         

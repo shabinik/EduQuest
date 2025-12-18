@@ -43,6 +43,8 @@ class User(AbstractUser):
         ('other', 'Other')
     ],blank=True,null=True)
     profile_image = models.CharField(max_length=225,blank=True,null=True)
+    DOB = models.DateField(null=True,blank=True)
+    must_change_password = models.BooleanField(default=True)
     
     def save(self,*args,**kwargs):
         if self.role == 'superadmin':

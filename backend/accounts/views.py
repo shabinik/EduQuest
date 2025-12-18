@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import permissions,status
 from rest_framework.response import Response
-from .serializers import LoginSerializer,UserSerializer,AdminSignupSerializer,AdminVerifyEmailSerializer
+from .serializers import LoginSerializer,UserSerializer,AdminSignupSerializer,AdminVerifyEmailSerializer,ChangePasswordSerializer
 from django.conf import settings
 
 
@@ -90,3 +90,16 @@ class AdminVerifyEmailView(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)  
     
     
+class ChangePasswordView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self,request):
+        serializer = ChangePasswordSerializer(data = request.data, context={"request":request})
+
+        if serializer.is_valid():
+            user = request.user
+            user.set_password(serializer.validated_data['new_password'])
+            user.must_change_password = False
+            user.save()
+            return Response({"detail": "Password changed successfully."})
+        return Response(serializer.errors, status=400)
