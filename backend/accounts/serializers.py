@@ -10,6 +10,7 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     tenant_name = serializers.SerializerMethodField(read_only = True)
+    profile_image = serializers.CharField(read_only = True)
 
     class Meta:
         model = User
@@ -17,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
             "id","username","full_name","email","role","tenant","tenant_name",
             "phone","gender","profile_image"
         ]
-        read_only_fields = ["id","role","tenant_name"]
+        read_only_fields = ["id","role","tenant_name","profile_image"]
 
     def get_tenant_name(self,obj):
         return obj.tenant.institute_name if obj.tenant else None
@@ -151,6 +152,44 @@ class AdminVerifyEmailSerializer(serializers.Serializer):
 
         return user
     
+
+class AdminProfileSerializer(serializers.ModelSerializer):
+    tenant_name = serializers.CharField(source="tenant.institute_name", required=False)
+    tenant_email = serializers.EmailField(source="tenant.email", required=False)
+    tenant_phone = serializers.CharField(source="tenant.phone", required=False)
+    tenant_status = serializers.CharField(source="tenant.status", read_only=True)
+
+    profile_image = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "full_name",
+            "email",
+            "phone",
+            "gender",
+            "profile_image",
+            "tenant_name",
+            "tenant_email",
+            "tenant_phone",
+            "tenant_status",
+        ]
+        read_only_fields = ["email", "tenant_status", "profile_image"]
+
+    def update(self, instance, validated_data):
+        tenant_data = validated_data.pop("tenant", {})
+        tenant = instance.tenant
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+
+        if tenant and tenant_data:
+            for key, value in tenant_data.items():
+                setattr(tenant, key, value)
+            tenant.save()
+
+        return instance
 
         
 

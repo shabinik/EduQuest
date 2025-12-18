@@ -2,8 +2,11 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import permissions,status
 from rest_framework.response import Response
-from .serializers import LoginSerializer,UserSerializer,AdminSignupSerializer,AdminVerifyEmailSerializer,ChangePasswordSerializer
+from .serializers import LoginSerializer,UserSerializer,AdminSignupSerializer,AdminVerifyEmailSerializer,ChangePasswordSerializer,AdminProfileSerializer
 from django.conf import settings
+from . permissions import IsAdmin
+import cloudinary.uploader
+from rest_framework.parsers import MultiPartParser,FormParser
 
 
 # Create your views here.
@@ -68,6 +71,31 @@ class ProfileView(APIView):
         return Response(serializer.data)
     
 
+class ProfileImageUploadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self,request):
+        image = request.FILES.get("image")
+
+        if not image:
+            return Response({"detail": "No image provided"},status=status.HTTP_400_BAD_REQUEST)
+        
+        #Upload to cloudinary
+        result = cloudinary.uploader.upload(
+            image,
+            folder = "eduquest/profile_images",
+            public_id = f"user_{request.user.id}",
+            overwrite = True
+        )
+
+        #Save Url
+        request.user.profile_image = result["secure_url"]
+        request.user.save()
+
+        return Response({"profile_image":result["secure_url"]},status=status.HTTP_200_OK)
+    
+
 
 class AdminSingupView(APIView):
     def post(self,request):
@@ -89,7 +117,32 @@ class AdminVerifyEmailView(APIView):
             return Response({"message":"Email verified. You can now login."})
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)  
     
-    
+
+class AdminProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != "admin":
+            return Response({"detail": "Not an admin"}, status=403)
+
+        serializer = AdminProfileSerializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        if request.user.role != "admin":
+            return Response({"detail": "Not an admin"}, status=403)
+
+        serializer = AdminProfileSerializer(
+            request.user, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=400)
+
+
+   
 class ChangePasswordView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 

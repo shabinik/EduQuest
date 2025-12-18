@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from "react-router-dom"
+import { useNavigate,Link } from "react-router-dom"
 import axiosInstance from "../api/axiosInstance"
 
 function AdminSignup() {
@@ -108,6 +108,12 @@ function AdminSignup() {
             >
               Sign Up
             </button>
+            <p className="text-sm text-gray-600 mt-4 text-center">
+                    Already Have an Account?{" "}
+                    <Link to="/admin/login" className="text-blue-500 underline">
+                        Login
+                    </Link>
+                </p>
           </>
         )}
 

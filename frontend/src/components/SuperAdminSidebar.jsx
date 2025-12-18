@@ -7,9 +7,9 @@ function SuperAdminSidebar() {
 
     const logout = async () => {
         try{
-            await axiosInstance.post("accounts/logout")
+            await axiosInstance.post("accounts/logout/")
             sessionStorage.clear()
-            navigate("/login")
+            navigate("/superadmin/login")
         } catch (err) {
             console.error(err)
             navigate("/login")

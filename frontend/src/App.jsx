@@ -24,6 +24,7 @@ import StudentLayout from './pages/StudentLayout'
 import StudentDashboard from './pages/StudentDashboard'
 import StudentProfile from './pages/StudentProfile'
 import StudentChangePassword from './pages/StudentChangePassword'
+import AdminProfile from './pages/AdminProfile'
 
 function App() {
   return (
@@ -45,7 +46,8 @@ function App() {
           <Route index element={<AdminDashboard/>} />
           <Route path='plans' element={<BuyPlan/>} /> 
           <Route path='teachers' element={<TeacherList/>} />
-          <Route path="students" element={<StudentList/>} /> 
+          <Route path="students" element={<StudentList/>} />
+          <Route path="profile" element={<AdminProfile />} /> 
         </Route>
         
         <Route path="/teacher/login" element={<TeacherLogin />} />

@@ -72,6 +72,9 @@ class TeacherProfileView(APIView):
         return Response(serializer.data)
     
     def put(self,request):
+        user = request.user
+        if user.role != "teacher":
+            return Response({"detail": "Not a teacher"}, status=status.HTTP_403_FORBIDDEN)
         teacher = request.user.teacher_profile
         serializer = TeacherProfileSerializer(teacher,data = request.data,partial = True)
         if serializer.is_valid():

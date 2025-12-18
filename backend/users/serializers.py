@@ -87,19 +87,19 @@ class TeacherProfileSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(source='user.phone',required = False)
     gender = serializers.CharField(source='user.gender', required=False)
     DOB = serializers.DateField(source='user.DOB', required=False)
-    profile_image = serializers.ImageField(
+    profile_image = serializers.CharField(
         source='user.profile_image',
-        required=False,
+        read_only = True,
+
         allow_null=True
     )
 
     class Meta:
         model = Teacher
         fields = ['id', 'email', 'full_name', 'phone','gender','DOB','profile_image', 'qualification', 'joining_date', 'salary']
-        read_only_fields = ['id','email']
+        read_only_fields = ['id','email','profile_image']
 
     def update(self, instance, validated_data):
-        print("validated_data:",validated_data)
         user_data = validated_data.pop('user',{})
         user = instance.user
 
@@ -193,6 +193,8 @@ class StudentProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source="user.email", read_only=True)
     full_name = serializers.CharField(source="user.full_name", required=False)
     phone = serializers.CharField(source="user.phone", required=False)
+    profile_image = serializers.CharField(source='user.profile_image',read_only=True,required=False)
+
 
     class Meta:
         model = Student
@@ -200,6 +202,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             "email",
             "full_name",
             "phone",
+            "profile_image",
             "admission_number",
             "class_id",
             "roll_number",
@@ -207,7 +210,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             "guardian_contact",
             "admission_date",
         ]
-        read_only_fields = ["admission_number", "class_id", "roll_number"]
+        read_only_fields = ["admission_number", "class_id", "roll_number","profile_image"]
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop("user", {})

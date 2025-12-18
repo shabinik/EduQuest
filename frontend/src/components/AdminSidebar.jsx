@@ -43,6 +43,9 @@ export default function AdminSidebar() {
         <NavLink to="/admin/students" style={linkStyle}>
           Students
         </NavLink>
+        <NavLink to="/admin/profile" style={linkStyle}>
+          Profile
+        </NavLink>
 
         {/* later: add Profile Students, etc. */}
       </nav>

@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 
-export default function StudentSidebar() {
+export default function TeacherSidebar() {
   const navigate = useNavigate();
 
   const logout = async () => {
@@ -11,7 +11,7 @@ export default function StudentSidebar() {
     } catch (err) {
       console.error(err);
     }
-    navigate("/student/login");
+    navigate("/teacher/login");
   };
 
   const linkStyle = ({ isActive }) => ({
@@ -26,18 +26,18 @@ export default function StudentSidebar() {
 
   return (
     <aside style={{ width: 240, padding: 20, borderRight: "1px solid #eee" }}>
-      <h2 style={{ marginBottom: 12 }}>Student</h2>
+      <h2 style={{ marginBottom: 12 }}>Teacher</h2>
 
       <nav>
-        <NavLink to="/student" end style={linkStyle}>
+        <NavLink to="/teacher" end style={linkStyle}>
           Dashboard
         </NavLink>
 
-        <NavLink to="/student/profile" style={linkStyle}>
+        <NavLink to="/teacher/profile" style={linkStyle}>
           My Profile
         </NavLink>
 
-        <NavLink to="/student/change-password" style={linkStyle}>
+        <NavLink to="/teacher/change-password" style={linkStyle}>
           Change Password
         </NavLink>
       </nav>
