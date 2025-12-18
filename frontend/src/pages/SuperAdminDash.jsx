@@ -12,7 +12,7 @@ function SuperAdminDash() {
                 const res = await axiosInstance.get("accounts/profile/")
                 setUser(res.data)
             } catch (err) {
-                navigate("/login")
+                navigate("/superadmin/login")
             }
         }
         fetchProfile()
@@ -31,7 +31,7 @@ function SuperAdminDash() {
       <button onClick={async () => {
         await axiosInstance.post("accounts/logout/");
         sessionStorage.clear();
-        navigate("/login");
+        navigate("/superadmin/login");
       }} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">Logout</button>
     </div>
   )

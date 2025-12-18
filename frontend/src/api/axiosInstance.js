@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
     baseURL: API_BASE,
     withCredentials: true,      //include cookies in request
     headers: {
-        "content-Type":"application/json",
+        "Content-Type":"application/json",
     },
 })
 

@@ -55,6 +55,10 @@ function AdminLogin() {
                     Login
                 </button>
 
+                <p className="text-sm text-center mt-3">
+                    Not a School Admin? <Link to="/" className="text-blue-500 underline">Back</Link>
+                </p>
+
                 {/* Signup link */}
                 <p className="text-sm text-gray-600 mt-4 text-center">
                     Don’t have an account?{" "}

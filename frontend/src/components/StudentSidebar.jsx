@@ -1,9 +1,8 @@
-// src/components/AdminSidebar.jsx
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 
-export default function AdminSidebar() {
+export default function StudentSidebar() {
   const navigate = useNavigate();
 
   const logout = async () => {
@@ -12,8 +11,7 @@ export default function AdminSidebar() {
     } catch (err) {
       console.error(err);
     }
-    sessionStorage.clear();
-    navigate("/admin/login");
+    navigate("/student/login");
   };
 
   const linkStyle = ({ isActive }) => ({
@@ -21,30 +19,27 @@ export default function AdminSidebar() {
     padding: "12px 16px",
     textDecoration: "none",
     color: isActive ? "white" : "#111",
-    background: isActive ? "#16a34a" : "transparent",
+    background: isActive ? "#2563eb" : "transparent",
     borderRadius: 6,
     marginBottom: 6
   });
 
   return (
     <aside style={{ width: 240, padding: 20, borderRight: "1px solid #eee" }}>
-      <h2 style={{ marginBottom: 12 }}>School Admin</h2>
+      <h2 style={{ marginBottom: 12 }}>Student</h2>
 
       <nav>
-        <NavLink to="/admin" style={linkStyle} end>
+        <NavLink to="/student" end style={linkStyle}>
           Dashboard
         </NavLink>
-        <NavLink to="/admin/plans" style={linkStyle}>
-          Subscription Plans
-        </NavLink>
-        <NavLink to="/admin/teachers" style={linkStyle}>
-          Teachers
-        </NavLink>
-        <NavLink to="/admin/students" style={linkStyle}>
-          Students
+
+        <NavLink to="/student/profile" style={linkStyle}>
+          My Profile
         </NavLink>
 
-        {/* later: add Profile Students, etc. */}
+        <NavLink to="/student/change-password" style={linkStyle}>
+          Change Password
+        </NavLink>
       </nav>
 
       <div style={{ marginTop: 24 }}>

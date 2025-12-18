@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import axiosInstance from '../api/axiosInstance'
-import { useNavigate } from "react-router-dom"
+import { useNavigate,Link } from "react-router-dom"
 
 
 function SuperAdminLogin() {
@@ -24,6 +24,8 @@ function SuperAdminLogin() {
             
             if (user.role === "superadmin" || user.is_superuser) {
                 navigate("/superadmin")
+            }else{
+                setError("Sorry, You are not a Super Admin")
             }
         } catch (err) {
             setError("Invalid credentials")
@@ -40,6 +42,9 @@ function SuperAdminLogin() {
             <label>Password</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full mb-4 p-2 border" />
             <button className="w-full bg-blue-600 text-white py-2 rounded">Login</button>
+            <p className="text-sm text-center mt-3">
+              Not a Super Admin? <Link to="/" className="text-blue-500 underline">Back</Link>
+            </p>
         </form>
 
     </div>
