@@ -1,6 +1,7 @@
 // src/pages/StudentList.jsx
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 function AddStudentForm({ onCreated, onCancel }) {
   const [form, setForm] = useState({
@@ -18,13 +19,30 @@ function AddStudentForm({ onCreated, onCancel }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setLoading(true);
+
+    if (!form.full_name.trim()) {
+      setError("Full name cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!/^\d+$/.test(form.roll_number)) {
+      setError("Roll number must contain only digits");
+      setLoading(false);
+      return;
+    }
 
     try {
-      await axiosInstance.post("users/students/create/", form);
+      await axiosInstance.post("users/students/create/", {...form,
+        full_name: form.full_name.trim(),
+        admission_number: form.admission_number.trim(),
+        class_id: form.class_id.trim(),
+        roll_number: Number(form.roll_number),
+      });
       onCreated();
-    } catch (err) {
+    } catch (err) { 
       setError(
         err.response?.data
           ? JSON.stringify(err.response.data)
@@ -46,7 +64,7 @@ function AddStudentForm({ onCreated, onCancel }) {
         <input name="full_name" placeholder="Full Name" onChange={handleChange} required className="border p-2 rounded" />
         <input name="admission_number" placeholder="Admission No" onChange={handleChange} required className="border p-2 rounded" />
         <input name="class_id" placeholder="Class" onChange={handleChange} required className="border p-2 rounded" />
-        <input name="roll_number" placeholder="Roll No" onChange={handleChange} required className="border p-2 rounded" />
+        <input name="roll_number" placeholder="Roll No" onChange={handleChange} inputMode="numeric" pattern="[0-9]" required className="border p-2 rounded" />
 
         <div className="col-span-2 flex gap-2 mt-2">
           <button disabled={loading} className="bg-green-600 text-white px-4 py-2 rounded">
@@ -61,11 +79,122 @@ function AddStudentForm({ onCreated, onCancel }) {
   );
 }
 
+
+// Edit Student
+
+function EditStudentForm({ student, onUpdated, onCancel }) {
+  const [form, setForm] = useState({
+    full_name: student.full_name || "",
+    phone: student.phone || "",
+    guardian_name: student.guardian_name || "",
+    guardian_contact: student.guardian_contact || "",
+    class_id: student.class_id || "",
+    roll_number: student.roll_number || "",
+  });
+
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const save = async () => {
+    setSaving(true);
+    setError("");
+    try {
+      await axiosInstance.put(
+        `users/students/update/${student.id}/`,
+        form
+      );
+      onUpdated();
+    } catch (err) {
+      setError("Failed to update student");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-white p-6 rounded-xl shadow mb-6">
+      <h3 className="text-lg font-semibold mb-4">Edit Student</h3>
+
+      {error && <p className="text-red-600 mb-3">{error}</p>}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input
+          name="full_name"
+          value={form.full_name}
+          onChange={handleChange}
+          placeholder="Full Name"
+          className="input"
+        />
+        <input
+          name="phone"
+          value={form.phone}
+          onChange={handleChange}
+          placeholder="Phone"
+          className="input"
+        />
+
+        <input
+          name="guardian_name"
+          value={form.guardian_name}
+          onChange={handleChange}
+          placeholder="Guardian Name"
+          className="input"
+        />
+        <input
+          name="guardian_contact"
+          value={form.guardian_contact}
+          onChange={handleChange}
+          placeholder="Guardian Contact"
+          className="input"
+        />
+
+        <input
+          name="class_id"
+          value={form.class_id}
+          onChange={handleChange}
+          placeholder="Class"
+          className="input"
+        />
+        <input
+          name="roll_number"
+          value={form.roll_number}
+          onChange={handleChange}
+          placeholder="Roll Number"
+          className="input"
+        />
+      </div>
+
+      <div className="flex gap-4 mt-6">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        >
+          {saving ? "Saving..." : "Save"}
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-5 py-2 bg-gray-300 rounded hover:bg-gray-400"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+
 export default function StudentList() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null)
   const [error, setError] = useState("");
+  const navigate = useNavigate()
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -117,6 +246,17 @@ export default function StudentList() {
         />
       )}
 
+      {editingStudent && (
+        <EditStudentForm
+          student={editingStudent}
+          onUpdated={() => {
+            setEditingStudent(null)
+            fetchStudents()
+          }}
+          onCancel={()=> {setEditingStudent(null)}}
+        />
+      )}
+
       {loading ? (
         <div>Loading...</div>
       ) : error ? (
@@ -124,11 +264,11 @@ export default function StudentList() {
       ) : (
         <div className="bg-white rounded shadow overflow-x-auto">
           <table className="w-full border-collapse">
-            <thead className="bg-gray-100">
+            <thead className="bg-gray-100 text-sm">
               <tr>
+                <th className="p-3">Profile</th>
                 <th className="p-3 text-left">Name</th>
                 <th className="p-3 text-left">Email</th>
-                <th className="p-3">Admission No</th>
                 <th className="p-3">Class</th>
                 <th className="p-3">Roll</th>
                 <th className="p-3 text-center">Actions</th>
@@ -144,21 +284,45 @@ export default function StudentList() {
               )}
 
               {students.map((s) => (
-                <tr key={s.id} className="border-t hover:bg-gray-50">
-                  <td className="p-3">{s.full_name}</td>
-                  <td className="p-3">{s.email}</td>
-                  <td className="p-3">{s.admission_number}</td>
-                  <td className="p-3">{s.class_id}</td>
-                  <td className="p-3">{s.roll_number}</td>
-                  <td className="p-3 text-center">
-                    <button
-                      onClick={() => deleteStudent(s.id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
+                <tr key={s.id} className="border-t hover:bg-gray-50 text-sm">
+
+                {/* Profile Image */}
+                <td className="p-3">
+                  <img
+                    src={s.profile_image || "/avatar.png"}
+                    className="w-10 h-10 rounded-full object-cover"
+                    alt="Profile"
+                  />
+                </td>
+
+                <td className="p-3">{s.full_name}</td>
+                <td className="p-3">{s.email}</td>
+                <td className="p-3 text-center">{s.class_id}</td>
+                <td className="p-3 text-center">{s.roll_number}</td>
+
+                <td className="p-3 text-center space-x-2">
+                  <button
+                    onClick={() => navigate(`/admin/students/${s.id}`)}
+                    className="bg-blue-500 text-white px-3 py-1 rounded text-xs"
+                  >
+                    View
+                  </button>
+
+                  <button
+                    onClick={() => setEditingStudent(s)}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded text-xs"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                     onClick={() => deleteStudent(s.id)}
+                     className="bg-red-500 text-white px-3 py-1 rounded text-xs"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
               ))}
             </tbody>
           </table>

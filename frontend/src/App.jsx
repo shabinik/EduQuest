@@ -25,6 +25,7 @@ import StudentDashboard from './pages/StudentDashboard'
 import StudentProfile from './pages/StudentProfile'
 import StudentChangePassword from './pages/StudentChangePassword'
 import AdminProfile from './pages/AdminProfile'
+import AdminStudentDetail from './pages/AdminStudentDetail'
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
           <Route path='plans' element={<BuyPlan/>} /> 
           <Route path='teachers' element={<TeacherList/>} />
           <Route path="students" element={<StudentList/>} />
+          <Route path="students/:id" element={<AdminStudentDetail/>}/>
           <Route path="profile" element={<AdminProfile />} /> 
         </Route>
         

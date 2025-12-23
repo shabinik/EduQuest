@@ -10,6 +10,26 @@ class SubscriptionPlanSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id","created_at","updated_at"]
 
+    def validate_plan_name(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Plan name cannot be empty or spaces only.")
+        return value
+
+    def validate_duration_months(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Duration must be a positive number.")
+        return value
+
+    def validate_price(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Price must be a positive amount.")
+        return value
+
+    def validate_max_students(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Max students must be a positive number.")
+        return value
+
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     plan = SubscriptionPlanSerializer(read_only = True)

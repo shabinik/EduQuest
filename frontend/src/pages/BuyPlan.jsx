@@ -41,19 +41,65 @@ function BuyPlan() {
         })
     }
   return (
-    <div>
-        <h1>Availble Plans</h1>
+    <div className="p-8 max-w-7xl mx-auto">
+    {/* Header */}
+    <div className="text-center mb-12">
+      <h1 className="text-3xl font-bold">Available Plans</h1>
+      <p className="text-gray-500 mt-2">
+        Choose the best plan for your institution
+      </p>
+    </div>
 
-        {plans.map((p) => (
-        <div key={p.id} style={{ border: "1px solid black", padding: 10 }}>
-          <h3>{p.plan_name}</h3>
-          <p>{p.duration_months} months</p>
-          <p>₹ {p.price}</p>
+    {/* Pricing Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {plans.map((p) => (
+        <div
+          key={p.id}
+          className="bg-white rounded-xl border shadow-sm p-6 flex flex-col"
+        >
+          {/* Plan Name */}
+          <h3 className="text-xl font-semibold mb-1">
+            {p.plan_name}
+          </h3>
 
-          <button onClick={() => buy(p.id)}>Buy</button>
+          <p className="text-gray-500 mb-4">
+            {p.description || "Best plan for institutions"}
+          </p>
+
+          {/* Price */}
+          <div className="text-4xl font-bold mb-1">
+            ₹{p.price}
+            <span className="text-base font-medium text-gray-500">
+              {" "} / {p.duration_months} months
+            </span>
+          </div>
+
+          <hr className="my-4" />
+
+          {/* Features */}
+          <ul className="space-y-3 text-sm text-gray-700 mb-6">
+            <li className="flex items-center gap-2">
+              ✅ {p.duration_months} Months Duration
+            </li>
+            <li className="flex items-center gap-2">
+              ✅ Student Limit: {p.max_students || "Unlimited"}
+            </li>
+            <li className="flex items-center gap-2">
+              ✅ Support Included
+            </li>
+          </ul>
+
+          {/* Buy Button */}
+          <button
+            onClick={() => buy(p.id)}
+            className="mt-auto py-2 rounded text-white font-medium bg-gray-900 hover:bg-black"
+          >
+            Buy {p.plan_name}
+          </button>
         </div>
       ))}
     </div>
+  </div>
   )
 }
 

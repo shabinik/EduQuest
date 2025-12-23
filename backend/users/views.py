@@ -2,7 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .serializers import TeacherCreateSerializer,TeacherProfileSerializer,StudentCreateSerializer,StudentListSerializer,StudentProfileSerializer
+from .serializers import ( TeacherCreateSerializer,TeacherProfileSerializer,
+                          StudentCreateSerializer,StudentListSerializer,StudentProfileSerializer,StudentDetailSerializer
+)
 from accounts.permissions import IsAdmin
 from . models import Teacher,Student
 
@@ -28,14 +30,44 @@ class TeacherListView(APIView):
         data = []
         for t in qs:
             data.append({
-                'id':t.id,
-                'email':t.user.email,
-                'full_name':t.user.full_name,
-                'qualification':t.qualification,
-                'joining_date':t.joining_date,
+                "id": t.id,
+                "full_name": t.user.full_name,
+                "email": t.user.email,
+                "phone": t.user.phone,
+                "gender": t.user.gender,
+                "DOB": t.user.DOB,
+                "profile_image": t.user.profile_image,
+                "qualification": t.qualification,
+                "salary": t.salary,
+                "joining_date": t.joining_date,
             })
         return Response(data)
     
+
+class UpdateTeacherView(APIView):
+    permission_classes = [IsAuthenticated,IsAdmin]
+
+    def put(self, request, teacher_id):
+        try:
+            teacher = Teacher.objects.select_related("user").get(
+                id = teacher_id, user__tenant = request.user.tenant
+            )
+        except Teacher.DoesNotExist:
+            return Response({"detail": "Teacher not found"}, status=404)
+    
+        user = teacher.user
+        data = request.data
+
+        user.full_name = data.get("full_name",user.full_name)
+        user.phone = data.get("phone",user.phone)
+        user.save()
+
+        teacher.qualification = data.get("qualification", teacher.qualification)
+        teacher.joining_date = data.get("joining_date", teacher.joining_date)
+        teacher.salary = data.get("salary", teacher.salary)
+        teacher.save() 
+
+        return Response({"success": True})
 
 class DeleteTeacherView(APIView):
     permission_classes = [IsAuthenticated,IsAdmin]
@@ -130,6 +162,50 @@ class StudentProfileView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
     
+
+
+class UpdateStudentView(APIView):
+    permission_classes = [IsAuthenticated,IsAdmin]
+
+    def put(self, request, student_id):
+        try:
+            student = Student.objects.select_related("user").get(
+                id = student_id,
+                user__tenant = request.user.tenant
+            )
+        except Student.DoesNotExist:
+            return Response({"details":"Student not found"},status=404)
+        
+        user = student.user
+        data = request.data
+        user.full_name = data.get("full_name", user.full_name)
+        user.phone = data.get("phone", user.phone)
+        user.save()
+
+        student.guardian_name = data.get("guardian_name", student.guardian_name)
+        student.guardian_contact = data.get("guardian_contact", student.guardian_contact)
+        student.class_id = data.get("class_id", student.class_id)
+        student.roll_number = data.get("roll_number", student.roll_number)
+        student.save()
+
+        return Response({"success":True})
+
+
+class AdminStudentDetailView(APIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    def get(self, request, student_id):
+        try:
+            student = Student.objects.select_related("user").get(
+                id=student_id,
+                user__tenant=request.user.tenant
+            )
+        except Student.DoesNotExist:
+            return Response({"detail": "Student not found"}, status=404)
+
+        serializer = StudentDetailSerializer(student)
+        return Response(serializer.data)
+
 
 
 class DeleteStudentView(APIView):

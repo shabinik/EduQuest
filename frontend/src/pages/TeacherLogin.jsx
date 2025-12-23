@@ -7,11 +7,19 @@ function TeacherLogin() {
     const [username,setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setError('')
+        if (!username || !password) {
+          setError("Please enter both email and password");
+          return;
+        }
+
+        setError("")
+        setLoading(true)
+
         try {
             const res = await axiosInstance.post('accounts/login/',{username,password})
             const user = res.data.user
@@ -29,8 +37,13 @@ function TeacherLogin() {
             }
             
         } catch (error) {
-            console.error(err)
-            setError(err.response?.data?.detail || 'Invalid credentials')
+            if (err.response?.status === 401) {
+              setError("Invalid email or password");
+            } else {
+              setError("Something went wrong. Please try again.");
+            }
+        } finally {
+          setLoading(false)
         }
     }
   return (
@@ -42,7 +55,15 @@ function TeacherLogin() {
         <input value={username} type="text" onChange={(e) => setUsername(e.target.value)} className="w-full mb-2 p-2 border" />
         <label>Password</label>
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full mb-4 p-2 border" />
-        <button className="w-full bg-blue-600 text-white py-2 rounded">Login</button>
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-2 rounded text-white transition
+            ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}
+          `}
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
 
         <p className="text-sm text-center mt-3">
           Not a teacher? <Link to="/" className="text-blue-500 underline">Back</Link>

@@ -11,6 +11,31 @@ const axiosInstance = axios.create({
     },
 })
 
+axiosInstance.interceptors.response.use(
+  res => res,
+  err => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      
+      const path = window.location.pathname;
+
+      // All login-related paths
+      const loginPaths = [
+        "/",
+        "/admin/login",
+        "/teacher/login",
+        "/student/login",
+        "/superadmin/login",
+      ];
+      
+      if (!loginPaths.includes(path)) {
+        window.location.href = "/";
+      }
+    }
+    return Promise.reject(err);
+  }
+);
 
 
 export default axiosInstance
