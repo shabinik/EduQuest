@@ -5,14 +5,16 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import ( TeacherCreateSerializer,TeacherProfileSerializer,
                           StudentCreateSerializer,StudentListSerializer,StudentProfileSerializer,StudentDetailSerializer
 )
-from accounts.permissions import IsAdmin
+from accounts.permissions import IsAdmin,HasActiveSubscription
 from . models import Teacher,Student
+from subscription.models import Subscription
+from users.models import Student
 
 
 # Create your views here.
 
 class CreateTeacherView(APIView):
-    permission_classes = [IsAuthenticated,IsAdmin]
+    permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]
 
     def post(self, request):
         serializer = TeacherCreateSerializer(data = request.data, context={'request':request})
@@ -23,7 +25,7 @@ class CreateTeacherView(APIView):
 
 
 class TeacherListView(APIView):
-    permission_classes = [IsAuthenticated,IsAdmin]
+    permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]
 
     def get(self,request):
         qs = Teacher.objects.filter(user__tenant = request.user.tenant).select_related('user')
@@ -45,7 +47,7 @@ class TeacherListView(APIView):
     
 
 class UpdateTeacherView(APIView):
-    permission_classes = [IsAuthenticated,IsAdmin]
+    permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]
 
     def put(self, request, teacher_id):
         try:
@@ -70,7 +72,7 @@ class UpdateTeacherView(APIView):
         return Response({"success": True})
 
 class DeleteTeacherView(APIView):
-    permission_classes = [IsAuthenticated,IsAdmin]
+    permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]
 
     def delete(self,request,teacher_id):
         try:
@@ -117,10 +119,17 @@ class TeacherProfileView(APIView):
 
 
 class CreateStudentView(APIView):
-    permission_classes = [IsAuthenticated,IsAdmin]
+    permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]
 
     def post(self,request):
+        tenant = request.user.tenant
         serializer = StudentCreateSerializer(data = request.data,context={"request":request})
+        subscription = Subscription.objects.filter(tenant = tenant).order_by("-start_date").first()
+        max_students = subscription.plan.max_students
+        current_count = Student.objects.filter(user__tenant = tenant).count()
+        if max_students < current_count:
+            return Response({"detail": f"Student limit reached ({max_students}). Upgrade plan."},status=400)
+        
         if serializer.is_valid():
             student = serializer.save()
             return Response(StudentListSerializer(student).data,status=status.HTTP_201_CREATED)
@@ -129,7 +138,7 @@ class CreateStudentView(APIView):
 
 
 class StudentListView(APIView):
-    permission_classes = [IsAuthenticated,IsAdmin]
+    permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]
 
     def get(self,request):
         tenant = request.user.tenant
@@ -165,7 +174,7 @@ class StudentProfileView(APIView):
 
 
 class UpdateStudentView(APIView):
-    permission_classes = [IsAuthenticated,IsAdmin]
+    permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]
 
     def put(self, request, student_id):
         try:
@@ -192,7 +201,7 @@ class UpdateStudentView(APIView):
 
 
 class AdminStudentDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsAdmin]
+    permission_classes = [IsAuthenticated, IsAdmin,HasActiveSubscription]
 
     def get(self, request, student_id):
         try:
@@ -209,7 +218,7 @@ class AdminStudentDetailView(APIView):
 
 
 class DeleteStudentView(APIView):
-    permission_classes = [IsAuthenticated,IsAdmin]
+    permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]
 
     def delete(self, request,student_id):
         try:

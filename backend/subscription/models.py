@@ -46,7 +46,7 @@ class Subscription(models.Model):
         verbose_name_plural = "Subscriptions"
 
     def save(self,*args,**kwargs):
-        if not self.expiry_date:
+        if not self.pk and not self.expiry_date:
             self.expiry_date = self.start_date + relativedelta(months=self.plan.duration_months)
         super().save(*args,**kwargs)
 

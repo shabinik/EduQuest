@@ -26,7 +26,11 @@ function AdminLogin() {
                 password,
             })
             const user = res.data.user
-            sessionStorage.setItem("user",JSON.stringify(user))
+            sessionStorage.setItem("user",JSON.stringify({
+              ...user,
+              has_active_subscription:res.data.has_active_subscription,
+              expiry_date: res.data.expiry_date,
+            }))
 
             if (user.role === "admin") {
                 navigate("/admin")

@@ -26,6 +26,9 @@ import StudentProfile from './pages/StudentProfile'
 import StudentChangePassword from './pages/StudentChangePassword'
 import AdminProfile from './pages/AdminProfile'
 import AdminStudentDetail from './pages/AdminStudentDetail'
+import SuperAdminSchools from './pages/SuperAdminSchools'
+import RequireActiveSubscription from './guards/RequireActiveSubscription'
+import SuperAdminBilling from './pages/SuperAdminBilling'
 
 function App() {
   return (
@@ -39,29 +42,31 @@ function App() {
             <Route path='plans' element={<SuperAdminPlans/>}/>
             <Route path='plans/create' element={<CreatePlan/>}/>
             <Route path='plans/edit/:id' element={<EditPlan/>} />
+            <Route path='schools' element={<SuperAdminSchools/>} />
+            <Route path= 'billing' element={<SuperAdminBilling/>} />
         </Route>
 
         <Route path='/admin/signup' element={<AdminSignup/>} />
         <Route path='/admin/login' element={<AdminLogin/>} />
         <Route path='/admin' element={<AdminLayout/>}>
-          <Route index element={<AdminDashboard/>} />
+          <Route index element={<RequireActiveSubscription><AdminDashboard/></RequireActiveSubscription>} />
           <Route path='plans' element={<BuyPlan/>} /> 
-          <Route path='teachers' element={<TeacherList/>} />
-          <Route path="students" element={<StudentList/>} />
-          <Route path="students/:id" element={<AdminStudentDetail/>}/>
+          <Route path='teachers' element={<RequireActiveSubscription><TeacherList/></RequireActiveSubscription>} />
+          <Route path="students" element={<RequireActiveSubscription><StudentList/></RequireActiveSubscription>} />
+          <Route path="students/:id" element={<RequireActiveSubscription><AdminStudentDetail/></RequireActiveSubscription>}/>
           <Route path="profile" element={<AdminProfile />} /> 
         </Route>
         
         <Route path="/teacher/login" element={<TeacherLogin />} />
         <Route path='/teacher' element={<TeacherLayout />}>
-          <Route index element = {<TeacherDashboard/>} />
+          <Route index element = {<RequireActiveSubscription><TeacherDashboard/></RequireActiveSubscription>} />
           <Route path='profile' element={<TeacherProfile/>}/>
           <Route path='change-password' element={<TeacherChangePassword />}/>
         </Route>
 
         <Route path='/student/login' element={<StudentLogin />} />
         <Route path='/student' element={<StudentLayout />}>
-          <Route index element={<StudentDashboard/>} />
+          <Route index element={<RequireActiveSubscription><StudentDashboard/></RequireActiveSubscription>} />
           <Route path='profile' element={<StudentProfile />} />
           <Route path='change-password' element={<StudentChangePassword />}/>
         </Route>

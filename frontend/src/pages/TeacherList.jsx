@@ -226,6 +226,8 @@ export default function TeacherList() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState(null)
   const [error, setError] = useState("");
+  const ITEMS_PER_PAGE = 10
+  const [currentPage,setCurrentPage] = useState(1)
 
   const fetchTeachers = async () => {
     setLoading(true);
@@ -236,6 +238,7 @@ export default function TeacherList() {
       setError("Failed to load teachers");
     } finally {
       setLoading(false);
+      setCurrentPage(1)
     }
   };
 
@@ -257,111 +260,140 @@ export default function TeacherList() {
     }
   };
 
+  const totalPages = Math.ceil(teachers.length / ITEMS_PER_PAGE)
+
+  const paginatedTeachers = teachers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
+
   return (
-    <div className="bg-white p-6 rounded shadow">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Teachers</h1>
-        <button
-          onClick={() => setShowAdd(!showAdd)}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          + Add Teacher
-        </button>
-      </div>
-      {showAdd && (
-        <AddTeacherForm
-          onCreated={() => {
-            setShowAdd(false);
-            fetchTeachers();
-          }}
-          onCancel={() => setShowAdd(false)}
-        />
-      )}
-
-      {editingTeacher && (
-        <EditTeacherForm
-          teacher={editingTeacher}
-          onUpdated={() => {
-            setEditingTeacher(null);
-            fetchTeachers();
-          }}
-          onCancel={() => setEditingTeacher(null)}
-       />
-      )}
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p className="text-red-600">{error}</p>
-      ) : teachers.length === 0 ? (
-        <p className="text-gray-500">No teachers found.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100 text-left text-sm">
-                <th className="p-3 border">Profile</th>
-                <th className="p-3 border">Name</th>
-                <th className="p-3 border">Email</th>
-                <th className="p-3 border">Phone</th>
-                <th className="p-3 border">Gender</th>
-                <th className="p-3 border">Qualification</th>
-                <th className="p-3 border">Joining Date</th>
-                <th className="p-3 border">Salary</th>
-                <th className="p-3 border text-center">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {teachers.map((t) => (
-                <tr key={t.id} className="hover:bg-gray-50 text-sm">
-
-                  {/* Profile Image */}
-                  <td className="p-3 border">
-                    <img
-                      src={t.profile_image || "/avatar.png"}
-                      alt="Profile"
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  </td>
-
-                  <td className="p-3 border">{t.full_name || "—"}</td>
-                  <td className="p-3 border">{t.email}</td>
-                  <td className="p-3 border">{t.phone || "—"}</td>
-                  <td className="p-3 border capitalize">{t.gender || "—"}</td>
-
-                  <td className="p-3 border">{t.qualification || "—"}</td>
-
-                  <td className="p-3 border">
-                    {t.joining_date
-                      ? new Date(t.joining_date).toLocaleDateString()
-                      : "—"}
-                  </td>
-
-                  <td className="p-3 border">₹ {t.salary}</td>
-
-                  <td className="p-3 border text-center space-x-2">
-                    <button
-                      onClick={() => setEditingTeacher(t)}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => deleteTeacher(t.id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-
-          </table>
-        </div>
-      )}
+  <div className="bg-white p-6 rounded shadow">
+    {/* Header */}
+    <div className="flex justify-between items-center mb-6">
+      <h1 className="text-2xl font-semibold">Teachers</h1>
+      <button
+        onClick={() => setShowAdd(!showAdd)}
+        className="bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        + Add Teacher
+      </button>
     </div>
-  );
+
+    {/* Add Teacher */}
+    {showAdd && (
+      <AddTeacherForm
+        onCreated={() => {
+          setShowAdd(false);
+          fetchTeachers();
+        }}
+        onCancel={() => setShowAdd(false)}
+      />
+    )}
+
+    {/* Edit Teacher */}
+    {editingTeacher && (
+      <EditTeacherForm
+        teacher={editingTeacher}
+        onUpdated={() => {
+          setEditingTeacher(null);
+          fetchTeachers();
+        }}
+        onCancel={() => setEditingTeacher(null)}
+      />
+    )}
+
+    {/* Content */}
+    {loading ? (
+      <p>Loading...</p>
+    ) : error ? (
+      <p className="text-red-600">{error}</p>
+    ) : paginatedTeachers.length === 0 ? (
+      <p className="text-gray-500">No teachers found.</p>
+    ) : (
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-100 text-left text-sm">
+              <th className="p-3 border">Profile</th>
+              <th className="p-3 border">Name</th>
+              <th className="p-3 border">Email</th>
+              <th className="p-3 border">Phone</th>
+              <th className="p-3 border">Gender</th>
+              <th className="p-3 border">Qualification</th>
+              <th className="p-3 border">Joining Date</th>
+              <th className="p-3 border">Salary</th>
+              <th className="p-3 border text-center">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {paginatedTeachers.map((t) => (
+              <tr key={t.id} className="hover:bg-gray-50 text-sm">
+                <td className="p-3 border">
+                  <img
+                    src={t.profile_image || "/avatar.png"}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                </td>
+
+                <td className="p-3 border">{t.full_name || "—"}</td>
+                <td className="p-3 border">{t.email}</td>
+                <td className="p-3 border">{t.phone || "—"}</td>
+                <td className="p-3 border capitalize">{t.gender || "—"}</td>
+                <td className="p-3 border">{t.qualification || "—"}</td>
+                <td className="p-3 border">
+                  {t.joining_date
+                    ? new Date(t.joining_date).toLocaleDateString()
+                    : "—"}
+                </td>
+                <td className="p-3 border">₹ {t.salary}</td>
+
+                <td className="p-3 border text-center space-x-2">
+                  <button
+                    onClick={() => setEditingTeacher(t)}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => deleteTeacher(t.id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Pagination */}
+        <div className="flex justify-center items-center gap-4 py-4">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+
+          <span className="text-sm">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+);
 }

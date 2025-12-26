@@ -59,6 +59,24 @@ class AdminSignupSerializer(serializers.Serializer):
             raise serializers.ValidationError("User with this email already exists.")
         return value
     
+    def validate_full_name(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Full name cannot be empty.")
+        return value
+
+    def validate_phone(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError("Phone number must contain only digits.")
+        if len(value) < 8:
+            raise serializers.ValidationError("Phone number is too short.")
+        return value
+
+    def validate_password(self, value):
+        if len(value) < 6:
+            raise serializers.ValidationError("Password must be at least 6 characters.")
+        return value
+
+    
     def validate(self, data):
         if data["password"] != data["confirm_password"]:
             raise serializers.ValidationError("Passwords do not match.")
@@ -105,7 +123,16 @@ class AdminSignupSerializer(serializers.Serializer):
         #SEND OTP VIA EMAIL
         send_mail(
             subject="EduQuest Admin Email Verification",
-            message=f"Your OTP code is {code}",
+            message=(
+                f"Hello {user.full_name},\n\n"
+                "We received a request to verify your email for EduQuest.\n\n"
+                f"Your One-Time Password (OTP) is:\n\n"
+                f"   {code}\n\n"
+                "This OTP is valid for 2 minutes.\n"
+                "If you did not request this, please ignore this email.\n\n"
+                "Regards,\n"
+                "EduQuest Team"
+            ),
             from_email=None, 
             recipient_list=[email],
             fail_silently=True,
@@ -113,6 +140,53 @@ class AdminSignupSerializer(serializers.Serializer):
 
         return user
     
+
+class AdminResendOtpSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        try:
+            user = User.objects.get(email = value,role = 'admin')
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Admin Acount not found")
+        
+        if user.is_active:
+            raise serializers.ValidationError("Email already verified")
+        self.user = user
+
+        return value
+    
+    def save(self):
+        user = self.user
+        
+        # Invalidate old OTPs
+        EmailOtp.objects.filter(user=user,is_used = False).update(is_used = True)
+        code = f"{random.randint(100000,999999)}"
+
+        EmailOtp.objects.create(
+            user = user,
+            email = user.email,
+            code = code,
+            expires_at=timezone.now() + timezone.timedelta(minutes=2)
+        )
+
+        send_mail (
+            subject="EduQuest | Verify Your Email",
+            message=(
+                f"Hello {user.full_name},\n\n"
+                "We received a request to verify your email for EduQuest.\n\n"
+                f"Your One-Time Password (OTP) is:\n\n"
+                f"   {code}\n\n"
+                "This OTP is valid for 2 minutes.\n"
+                "If you did not request this, please ignore this email.\n\n"
+                "Regards,\n"
+                "EduQuest Team"
+            ),
+            from_email= None,
+            recipient_list=[user.email],
+            fail_silently= False,
+        )
+
 
 class AdminVerifyEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()

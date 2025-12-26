@@ -2,12 +2,13 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import permissions,status
 from rest_framework.response import Response
-from .serializers import LoginSerializer,UserSerializer,AdminSignupSerializer,AdminVerifyEmailSerializer,ChangePasswordSerializer,AdminProfileSerializer
+from .serializers import LoginSerializer,UserSerializer,AdminSignupSerializer,AdminVerifyEmailSerializer,ChangePasswordSerializer,AdminProfileSerializer,AdminResendOtpSerializer
 from django.conf import settings
 from . permissions import IsAdmin
 import cloudinary.uploader
 from rest_framework.parsers import MultiPartParser,FormParser
-
+from accounts.models import User
+from subscription.models import Subscription
 
 # Create your views here.
 
@@ -22,8 +23,26 @@ class LoginView(APIView):
         access_token = data["access"]
         refresh_token = data["refresh"]
         user_data = data["user"]
+        user = User.objects.get(id=user_data["id"])
 
-        response = Response({"user":user_data},status=status.HTTP_200_OK)
+        has_active_subscription = False
+        expiry_date = None
+
+        if user.tenant:
+            subscription = Subscription.objects.filter(tenant=user.tenant,is_active=True
+                                                       ).order_by('-expiry_date').first()
+            if subscription:
+                has_active_subscription = True
+                expiry_date = subscription.expiry_date
+        
+        response = Response(
+            {
+                "user": user_data,
+                "has_active_subscription": has_active_subscription,
+                "expiry_date": expiry_date,
+            },
+            status=status.HTTP_200_OK
+        )
 
         #Set HTTP-only cookies (access short, refresh longer)
         # In production: secure=True, samesite='Strict' (and send over HTTPS)
@@ -107,7 +126,15 @@ class AdminSingupView(APIView):
                 status = status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
+class AdminResendOtpView(APIView):
+    def post(self, request):
+        serializer = AdminResendOtpSerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save() 
+            return Response({"message":"OTP resent successfully"})
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+          
 
 class AdminVerifyEmailView(APIView):
     def post(self,request):

@@ -24,14 +24,16 @@ function SuperAdminPlans() {
   }, []);
 
   const deletePlan = async (id) => {
-    if (!window.confirm("Delete this plan permanently?")) return;
-    try {
-      await axiosInstance.delete(`subscriptions/plans/${id}/`);
-      fetchPlans();
-    } catch {
-      alert("Failed to delete plan");
-    }
-  };
+  if (!window.confirm("Deactivate this plan? Existing schools won’t be affected.")) return;
+
+  try {
+    await axiosInstance.delete(`subscriptions/plans/${id}/`);
+    fetchPlans();
+  } catch (err) {
+    alert(err.response?.data?.message || "Failed to deactivate plan");
+  }
+};
+
 
   return (
     <div className="p-10">
@@ -105,7 +107,7 @@ function SuperAdminPlans() {
                   onClick={() => deletePlan(plan.id)}
                   className="w-full border border-red-500 text-red-600 py-2 rounded-lg hover:bg-red-50"
                 >
-                  Delete Plan
+                  Deactivate Plan
                 </button>
               </div>
             </div>

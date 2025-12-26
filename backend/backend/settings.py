@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'accounts',
     'subscription',
     'users',
+    'superadmin',
     'cloudinary',
     'cloudinary_storage',
     'django.contrib.admin',

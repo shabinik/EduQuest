@@ -64,7 +64,7 @@ function AddStudentForm({ onCreated, onCancel }) {
         <input name="full_name" placeholder="Full Name" onChange={handleChange} required className="border p-2 rounded" />
         <input name="admission_number" placeholder="Admission No" onChange={handleChange} required className="border p-2 rounded" />
         <input name="class_id" placeholder="Class" onChange={handleChange} required className="border p-2 rounded" />
-        <input name="roll_number" placeholder="Roll No" onChange={handleChange} inputMode="numeric" pattern="[0-9]" required className="border p-2 rounded" />
+        <input name="roll_number" placeholder="Roll No" onChange={handleChange} inputMode="numeric" required className="border p-2 rounded" />
 
         <div className="col-span-2 flex gap-2 mt-2">
           <button disabled={loading} className="bg-green-600 text-white px-4 py-2 rounded">
@@ -186,7 +186,7 @@ function EditStudentForm({ student, onUpdated, onCancel }) {
   );
 }
 
-
+//Student List
 
 export default function StudentList() {
   const [students, setStudents] = useState([]);
@@ -195,6 +195,8 @@ export default function StudentList() {
   const [editingStudent, setEditingStudent] = useState(null)
   const [error, setError] = useState("");
   const navigate = useNavigate()
+  const ITEMS_PER_PAGE = 10
+  const [currentPage, setCurrentPage] = useState(1)
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -206,6 +208,7 @@ export default function StudentList() {
       setError("Failed to load students");
     } finally {
       setLoading(false);
+      setCurrentPage(1)
     }
   };
 
@@ -224,110 +227,144 @@ export default function StudentList() {
     }
   };
 
+  const totalPages = Math.ceil(students.length / ITEMS_PER_PAGE)
+
+  const paginatedStudents = students.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-semibold">Students</h1>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          + Add Student
-        </button>
-      </div>
+  <div>
+    {/* Header */}
+    <div className="flex justify-between items-center mb-4">
+      <h1 className="text-2xl font-semibold">Students</h1>
+      <button
+        onClick={() => setShowAdd(true)}
+        className="bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        + Add Student
+      </button>
+    </div>
 
-      {showAdd && (
-        <AddStudentForm
-          onCreated={() => {
-            setShowAdd(false);
-            fetchStudents();
-          }}
-          onCancel={() => setShowAdd(false)}
-        />
-      )}
+    {/* Add Student */}
+    {showAdd && (
+      <AddStudentForm
+        onCreated={() => {
+          setShowAdd(false);
+          fetchStudents();
+        }}
+        onCancel={() => setShowAdd(false)}
+      />
+    )}
 
-      {editingStudent && (
-        <EditStudentForm
-          student={editingStudent}
-          onUpdated={() => {
-            setEditingStudent(null)
-            fetchStudents()
-          }}
-          onCancel={()=> {setEditingStudent(null)}}
-        />
-      )}
+    {/* Edit Student */}
+    {editingStudent && (
+      <EditStudentForm
+        student={editingStudent}
+        onUpdated={() => {
+          setEditingStudent(null);
+          fetchStudents();
+        }}
+        onCancel={() => setEditingStudent(null)}
+      />
+    )}
 
-      {loading ? (
-        <div>Loading...</div>
-      ) : error ? (
-        <div className="text-red-600">{error}</div>
-      ) : (
-        <div className="bg-white rounded shadow overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead className="bg-gray-100 text-sm">
+    {/* Content */}
+    {loading ? (
+      <div>Loading...</div>
+    ) : error ? (
+      <div className="text-red-600">{error}</div>
+    ) : (
+      <div className="bg-white rounded shadow overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead className="bg-gray-100 text-sm">
+            <tr>
+              <th className="p-3">Profile</th>
+              <th className="p-3 text-left">Name</th>
+              <th className="p-3 text-left">Email</th>
+              <th className="p-3">Class</th>
+              <th className="p-3">Roll</th>
+              <th className="p-3 text-center">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {paginatedStudents.length === 0 ? (
               <tr>
-                <th className="p-3">Profile</th>
-                <th className="p-3 text-left">Name</th>
-                <th className="p-3 text-left">Email</th>
-                <th className="p-3">Class</th>
-                <th className="p-3">Roll</th>
-                <th className="p-3 text-center">Actions</th>
+                <td colSpan="6" className="p-4 text-center text-gray-500">
+                  No students found
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {students.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="p-4 text-center text-gray-500">
-                    No students found
+            ) : (
+              paginatedStudents.map((s) => (
+                <tr key={s.id} className="border-t hover:bg-gray-50 text-sm">
+                  {/* Profile */}
+                  <td className="p-3">
+                    <img
+                      src={s.profile_image || "/avatar.png"}
+                      className="w-10 h-10 rounded-full object-cover"
+                      alt="Profile"
+                    />
+                  </td>
+
+                  <td className="p-3">{s.full_name}</td>
+                  <td className="p-3">{s.email}</td>
+                  <td className="p-3 text-center">{s.class_id}</td>
+                  <td className="p-3 text-center">{s.roll_number}</td>
+
+                  <td className="p-3 text-center space-x-2">
+                    <button
+                      onClick={() => navigate(`/admin/students/${s.id}`)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded text-xs"
+                    >
+                      View
+                    </button>
+
+                    <button
+                      onClick={() => setEditingStudent(s)}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded text-xs"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => deleteStudent(s.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded text-xs"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
-              )}
+              ))
+            )}
+          </tbody>
+        </table>
 
-              {students.map((s) => (
-                <tr key={s.id} className="border-t hover:bg-gray-50 text-sm">
+        {/* Pagination */}
+        <div className="flex justify-center items-center gap-4 py-4">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
 
-                {/* Profile Image */}
-                <td className="p-3">
-                  <img
-                    src={s.profile_image || "/avatar.png"}
-                    className="w-10 h-10 rounded-full object-cover"
-                    alt="Profile"
-                  />
-                </td>
+          <span className="text-sm">
+            Page {currentPage} of {totalPages}
+          </span>
 
-                <td className="p-3">{s.full_name}</td>
-                <td className="p-3">{s.email}</td>
-                <td className="p-3 text-center">{s.class_id}</td>
-                <td className="p-3 text-center">{s.roll_number}</td>
-
-                <td className="p-3 text-center space-x-2">
-                  <button
-                    onClick={() => navigate(`/admin/students/${s.id}`)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded text-xs"
-                  >
-                    View
-                  </button>
-
-                  <button
-                    onClick={() => setEditingStudent(s)}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded text-xs"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                     onClick={() => deleteStudent(s.id)}
-                     className="bg-red-500 text-white px-3 py-1 rounded text-xs"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-              ))}
-            </tbody>
-          </table>
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
 }

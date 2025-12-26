@@ -5,6 +5,7 @@ from . models import SubscriptionPlan,Subscription,Payment
 from . serializers import SubscriptionPlanSerializer,SubscriptionSerializer,PaymentSerializer
 import razorpay
 from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.response import Response
 from django.conf import settings
 from django.shortcuts import get_object_or_404
@@ -17,15 +18,32 @@ from django.utils import timezone
 #SUPER ADMINS VIEWS
 
 class SubscriptionPlanListCreateView(generics.ListCreateAPIView):
-    queryset = SubscriptionPlan.objects.all()
+    queryset = SubscriptionPlan.objects.filter(is_active = True)
     serializer_class = SubscriptionPlanSerializer
     permission_classes = [IsSuperAdmin]
 
+    
 
 class SubscriptionPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = SubscriptionPlan.objects.all()
     serializer_class = SubscriptionPlanSerializer
     permission_classes = [IsSuperAdmin]
+
+    def destroy(self, request, *args, **kwargs):
+        plan = self.get_object()
+        if Subscription.objects.filter(plan=plan, is_active=True).exists():
+            return Response(
+                {"message": "Cannot deactivate plan because schools are still using it."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        plan.is_active = False
+        plan.save()
+
+        return Response(
+            {"message": "Plan deactivated successfully"},
+            status=status.HTTP_200_OK
+        )
 
 
 #SCHOOLS VIEWS
@@ -152,10 +170,6 @@ class TenantSubscriptionsView(generics.ListAPIView):
         if not tenant:
             return Subscription.objects.none()
         return Subscription.objects.filter(tenant=tenant).order_by("-start_date")
-
-
-
-    
 
 
 

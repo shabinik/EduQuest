@@ -5,7 +5,6 @@ import BuyPlan from "./BuyPlan";
 
 function AdminDashboard() {
     const [user,setUser] = useState(null)
-    const [subs,setSubs] = useState(null)
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
 
@@ -14,9 +13,6 @@ function AdminDashboard() {
             try {
                 const profileRes = await axiosInstance.get("accounts/profile/")
                 setUser(profileRes.data)
-
-                const subsRes = await axiosInstance.get("subscriptions/tenant-subscriptions/")
-                setSubs(subsRes.data)
             } catch (err) {
                 console.error(err)
                 navigate('/admin/login')
@@ -28,27 +24,6 @@ function AdminDashboard() {
     },[navigate])
 
     if (loading) return <div>Loading dashboard...</div>;
-
-    const hasActiveSub = Array.isArray(subs) && subs.some((s) => s.is_active === true)
-    
-    if(!hasActiveSub) {
-        return (
-          <div>
-            <h1 className="text-2xl mb-4">Dashboard</h1>
-            {user && (
-              <p className="mb-4">
-                Welcome, <strong>{user.full_name || user.username}</strong>.{" "}
-                Your institute has no active subscription yet.
-              </p>
-            )}
-
-            <h2 className="text-xl mb-2">Choose a subscription plan to get started</h2>
-            <BuyPlan />
-          </div>
-        )
-      }
-
-    const activeSub = subs.find((s) => s.is_active === true)
 
     return (
     <div>
