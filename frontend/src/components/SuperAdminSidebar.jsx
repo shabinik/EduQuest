@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 
 function SuperAdminSidebar() {
   const navigate = useNavigate();
+  const [isLoggingOut,setIsLoggingOut] = useState(false)
 
   const logout = async () => {
+    setIsLoggingOut(true)
     try {
       await axiosInstance.post("accounts/logout/");
       sessionStorage.clear();
@@ -13,57 +15,99 @@ function SuperAdminSidebar() {
     } catch (err) {
       console.error(err);
       navigate("/");
+    } finally {
+      setIsLoggingOut(false)
     }
   };
 
-  const linkStyle = ({ isActive }) => ({
-    display: "block",
-    padding: "12px 16px",
-    textDecoration: "none",
-    color: isActive ? "white" : "#111",
-    background: isActive ? "#2563eb" : "transparent",
-    borderRadius: 6,
-    marginBottom: 6,
-  });
-
   return (
-    <aside style={{ width: 240, padding: 20, borderRight: "1px solid #eee" }}>
-      <h2 style={{ marginBottom: 16, fontWeight: 600 }}>
-        EduQuest Super Admin
-      </h2>
+     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg h-screen overflow-y-auto">
+      {/* Header */}
+      <div className="p-6 border-b border-gray-200">
+        <div className="flex items-center space-x-3 mb-2">
+          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-2xl shadow-md">
+            🎓
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-800">EduQuest</h2>
+            <p className="text-xs text-gray-500">Super Admin</p>
+          </div>
+        </div>
+      </div>
 
-      <nav>
-        <NavLink to="/superadmin" style={linkStyle} end>
-          Dashboard
+      {/* Navigation */}
+      <nav className="flex-1 p-4 space-y-2">
+        <NavLink
+          to="/superadmin"
+          end
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-gray-100 hover:text-indigo-600"
+            }`
+          }
+        >
+          <span className="text-xl">📊</span>
+          <span>Dashboard</span>
         </NavLink>
 
-        <NavLink to="/superadmin/schools" style={linkStyle}>
-          Schools
+        <NavLink
+          to="/superadmin/schools"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-gray-100 hover:text-indigo-600"
+            }`
+          }
+        >
+          <span className="text-xl">🏫</span>
+          <span>Schools</span>
         </NavLink>
 
-        <NavLink to="/superadmin/plans" style={linkStyle}>
-          Subscription Plans
+        <NavLink
+          to="/superadmin/plans"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-gray-100 hover:text-indigo-600"
+            }`
+          }
+        >
+          <span className="text-xl">💳</span>
+          <span>Subscription Plans</span>
         </NavLink>
 
-        <NavLink to="/superadmin/billing" style={linkStyle}>
-          Billing
+        <NavLink
+          to="/superadmin/billing"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-gray-100 hover:text-indigo-600"
+            }`
+          }
+        >
+          <span className="text-xl">💰</span>
+          <span>Billing</span>
         </NavLink>
-
       </nav>
 
-      <div style={{ marginTop: 24 }}>
+      {/* Footer with Logout */}
+      <div className="p-4 border-t border-gray-200">
         <button
           onClick={logout}
-          style={{
-            padding: "8px 12px",
-            background: "#ef4444",
-            color: "white",
-            border: "none",
-            borderRadius: 6,
-            width: "100%",
-          }}
+          disabled={isLoggingOut}
+          className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${
+            isLoggingOut
+              ? "bg-red-300 cursor-not-allowed text-red-800"
+              : "bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg"
+          }`}
         >
-          Logout
+          <span className="text-lg">{isLoggingOut ? "⏳" : "🚪"}</span>
+          <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
         </button>
       </div>
     </aside>

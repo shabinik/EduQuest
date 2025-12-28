@@ -19,44 +19,92 @@ export default function AdminStudentDetail() {
   if (!student) return <div className="p-6">Student not found</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-8">
+      {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
-        className="mb-4 text-blue-600 hover:underline"
+        className="flex items-center gap-2 text-indigo-600 font-semibold hover:underline text-sm mb-6"
       >
-        ← Back
+        ← Back to Students
       </button>
 
-      <div className="bg-white rounded-xl shadow p-6">
-        {/* Header */}
-        <div className="flex items-center gap-6 mb-6">
-          <img
-            src={student.profile_image || "/avatar.png"}
-            alt="Profile"
-            className="w-28 h-28 rounded-full object-cover border"
-          />
+      {/* Card */}
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+        {/* Banner */}
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 h-32"></div>
 
-          <div>
-            <h1 className="text-2xl font-semibold">
-              {student.full_name || "—"}
-            </h1>
-            <p className="text-gray-600">{student.email}</p>
-            <p className="text-sm text-gray-500 capitalize">
-              {student.gender || "—"}
-            </p>
+        {/* Content Container */}
+        <div className="px-8 pb-10">
+          {/* Header Section */}
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 -mt-16 mb-10">
+            <img
+              src={student.profile_image || "/avatar.png"}
+              alt="Profile"
+              className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-xl bg-white"
+            />
+
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">{student.full_name || "—"}</h1>
+              <p className="text-gray-500 text-sm">{student.email}</p>
+              {student.gender && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs mt-2 bg-indigo-100 text-indigo-700 font-semibold">
+                  🧍 {student.gender}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-          <Detail label="Phone" value={student.phone} />
-          <Detail label="Date of Birth" value={student.DOB} />
-          <Detail label="Admission No" value={student.admission_number} />
-          <Detail label="Admission Date" value={student.admission_date} />
-          <Detail label="Class" value={student.class_id} />
-          <Detail label="Roll Number" value={student.roll_number} />
-          <Detail label="Guardian Name" value={student.guardian_name} />
-          <Detail label="Guardian Contact" value={student.guardian_contact} />
+          {/* Information Sections */}
+          <div className="space-y-10">
+            
+            {/* Personal Info */}
+            <section>
+              <h3 className="text-lg font-bold flex items-center text-gray-800 mb-4">
+                <span className="text-xl mr-2">👤</span>
+                Personal Details
+              </h3>
+
+              <div className="bg-gray-50 rounded-xl p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <Detail label="Full Name" value={student.full_name} />
+                <Detail label="Phone" value={student.phone} />
+                <Detail label="Date of Birth" value={student.DOB} />
+                <Detail label="Guardian Name" value={student.guardian_name} />
+                <Detail label="Guardian Contact" value={student.guardian_contact} />
+              </div>
+            </section>
+
+            {/* Academic Info */}
+            <section>
+              <h3 className="text-lg font-bold flex items-center text-gray-800 mb-4">
+                <span className="text-xl mr-2">🎒</span>
+                Academic Information
+              </h3>
+
+              <div className="bg-indigo-50 rounded-xl p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <Detail label="Admission No" value={student.admission_number} />
+                <Detail label="Admission Date" value={student.admission_date} />
+                <Detail label="Roll Number" value={student.roll_number} />
+                <Detail label="Class" value={student.class_id} />
+              </div>
+            </section>
+          </div>
+
+          {/* Actions */}
+          <div className="mt-10 flex gap-4">
+            <button
+              onClick={() => navigate(`/admin/students/${student.id}/edit`)}
+              className="px-6 py-3 bg-gray-800 text-white rounded-lg font-semibold hover:bg-black shadow-md hover:shadow-lg transition-all"
+            >
+              ✏️ Edit Information
+            </button>
+
+            <button
+              onClick={() => navigate(-1)}
+              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 shadow transition-all"
+            >
+              ✕ Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -66,8 +114,8 @@ export default function AdminStudentDetail() {
 function Detail({ label, value }) {
   return (
     <div>
-      <p className="text-gray-500">{label}</p>
-      <p className="font-medium">{value || "—"}</p>
+      <p className="text-xs font-semibold text-gray-500 uppercase mb-1">{label}</p>
+      <p className="font-medium text-gray-800">{value || "—"}</p>
     </div>
   );
 }

@@ -23,7 +23,11 @@ function TeacherLogin() {
         try {
             const res = await axiosInstance.post('accounts/login/',{username,password})
             const user = res.data.user
-            sessionStorage.setItem('user',JSON.stringify(user))
+            sessionStorage.setItem("user", JSON.stringify({
+              ...user,
+              has_active_subscription:res.data.has_active_subscription,
+              expiry_date: res.data.expiry_date,
+            }));
 
             if (user.role !== 'teacher') {
               setError('This account is not a teacher account.')
@@ -36,7 +40,7 @@ function TeacherLogin() {
               navigate('/teacher/profile')
             }
             
-        } catch (error) {
+        } catch (err) {
             if (err.response?.status === 401) {
               setError("Invalid email or password");
             } else {
@@ -47,29 +51,89 @@ function TeacherLogin() {
         }
     }
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow w-96">
-        <h2 className="text-xl mb-4">Teacher Login</h2>
-        {error && <div className="text-red-600 mb-2">{error}</div>}
-        <label>Email</label>
-        <input value={username} type="text" onChange={(e) => setUsername(e.target.value)} className="w-full mb-2 p-2 border" />
-        <label>Password</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full mb-4 p-2 border" />
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full py-2 rounded text-white transition
-            ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}
-          `}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 p-4 relative overflow-hidden">
 
-        <p className="text-sm text-center mt-3">
-          Not a teacher? <Link to="/" className="text-blue-500 underline">Back</Link>
-        </p>
-      </form>
-    </div>
+            {/* Background Decorative Icons */}
+            <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-10 left-10 text-white text-6xl">📚</div>
+                <div className="absolute top-20 right-20 text-white text-5xl">🎓</div>
+                <div className="absolute bottom-20 left-20 text-white text-5xl">✏️</div>
+                <div className="absolute bottom-10 right-10 text-white text-6xl">📖</div>
+                <div className="absolute top-1/2 left-1/4 text-white text-4xl">🎒</div>
+                <div className="absolute top-1/3 right-1/3 text-white text-5xl">🏫</div>
+                <div className="absolute bottom-1/3 right-1/4 text-white text-4xl">📝</div>
+            </div>
+
+            <div className="w-full max-w-md relative z-10">
+                <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6">
+                        <h2 className="text-2xl font-bold text-white text-center">Teacher Login</h2>
+                        <p className="text-indigo-100 text-sm text-center mt-1">Educator Portal</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="px-8 py-8">
+                        {error && (
+                            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded mb-6 text-sm">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="mb-5">
+                            <label className="block text-gray-700 text-sm font-semibold mb-2">
+                                Email
+                            </label>
+                            <input
+                                value={username}
+                                type="text"
+                                onChange={(e) => setUsername(e.target.value)}
+                                disabled={loading}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                placeholder="teacher@example.com"
+                            />
+                        </div>
+
+                        <div className="mb-6">
+                            <label className="block text-gray-700 text-sm font-semibold mb-2">
+                                Password
+                            </label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                disabled={loading}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                placeholder="********"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`w-full py-3 rounded-lg text-white font-semibold transition-all duration-200 ${
+                                loading
+                                    ? "bg-indigo-400 cursor-not-allowed"
+                                    : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
+                            }`}
+                        >
+                            {loading ? "Logging in..." : "Login"}
+                        </button>
+
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                            <p className="text-sm text-center text-gray-600">
+                                Not a Teacher?{" "}
+                                <Link to="/" className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition">
+                                    Back to Home
+                                </Link>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+
+                <p className="text-center text-gray-400 text-xs mt-6">
+                    Unauthorized access is prohibited and monitored
+                </p>
+            </div>
+        </div>
   )
 }
 

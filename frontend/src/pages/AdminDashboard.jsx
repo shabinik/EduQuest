@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../api/axiosInstance'
-import BuyPlan from "./BuyPlan";
+import BuyPlan from "./BuyPlan"
 
 function AdminDashboard() {
     const [user,setUser] = useState(null)
+    const [subs,setSubs] = useState(null)
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
 
@@ -13,6 +14,9 @@ function AdminDashboard() {
             try {
                 const profileRes = await axiosInstance.get("accounts/profile/")
                 setUser(profileRes.data)
+
+                const subsRes = await axiosInstance.get("subscriptions/tenant-subscriptions/")
+                setSubs(subsRes.data)
             } catch (err) {
                 console.error(err)
                 navigate('/admin/login')
@@ -24,6 +28,8 @@ function AdminDashboard() {
     },[navigate])
 
     if (loading) return <div>Loading dashboard...</div>;
+
+    const activeSub = subs.find((s) => s.is_active === true)
 
     return (
     <div>

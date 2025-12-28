@@ -1,4 +1,3 @@
-// src/pages/TeacherLayout.jsx
 import React, { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
@@ -25,10 +24,14 @@ export default function TeacherLayout() {
   }, [navigate]);
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div className="flex h-screen bg-gradient-to-br from-emerald-50 to-green-50 overflow-hidden">
       <TeacherSidebar />
-      <main style={{ flex: 1, padding: 24 }}>
-        <Outlet />
+      <main className="flex-1 overflow-y-auto">
+        <div className="p-8">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
+        </div>
       </main>
     </div>
   );

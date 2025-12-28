@@ -21,10 +21,14 @@ export default function StudentLayout() {
   }, [navigate]);
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div className="flex h-screen bg-gradient-to-br from-blue-50 to-indigo-50 overflow-hidden">
       <StudentSidebar />
-      <main style={{ flex: 1, padding: 24 }}>
-        <Outlet />
+      <main className="flex-1 overflow-y-auto">
+        <div className="p-8">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
+        </div>
       </main>
     </div>
   );

@@ -31,17 +31,12 @@ class SubscriptionPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         plan = self.get_object()
-        if Subscription.objects.filter(plan=plan, is_active=True).exists():
-            return Response(
-                {"message": "Cannot deactivate plan because schools are still using it."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
         plan.is_active = False
         plan.save()
 
         return Response(
-            {"message": "Plan deactivated successfully"},
+            {"message": "Plan deactivated successfully. Existing subscribers remain active until expiry."},
             status=status.HTTP_200_OK
         )
 
