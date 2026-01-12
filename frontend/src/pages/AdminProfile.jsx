@@ -1,5 +1,6 @@
 import axiosInstance from "../api/axiosInstance"
 import React, { useEffect, useState } from "react"
+import toast from "react-hot-toast"
 
 function AdminProfile() {
   const [profile, setProfile] = useState(null)
@@ -25,11 +26,11 @@ function AdminProfile() {
       tenant_phone: profile.tenant_phone
     })
     setEditing(false)
-    alert("Profile updated")
+    toast.success("Profile updated successfully")
   }
 
   const uploadImage = async () => {
-    if (!image) return alert("Select an image first")
+    if (!image) return toast.error("Select an image first")
 
     const formData = new FormData()
     formData.append("image", image)

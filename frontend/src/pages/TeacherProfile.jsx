@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import axiosInstance from "../api/axiosInstance"
+import toast from "react-hot-toast"
 
 export default function TeacherProfile() {
   const [profile, setProfile] = useState(null)
@@ -29,11 +30,11 @@ export default function TeacherProfile() {
     })
     setSaving(false)
     setEditing(false)
-    alert("Profile updated")
+    toast.success("Profile updated successfully")
   }
 
   const uploadImage = async () => {
-    if (!image) return alert("Select an image first")
+    if (!image) return toast.error("Select an image first")
 
     const formData = new FormData()
     formData.append("image", image)
@@ -211,11 +212,12 @@ const Info = ({ label, value }) => (
   </div>
 )
 
-const Input = ({ label, ...props }) => (
+const Input = ({ label,value, ...props }) => (
   <div>
     <label className="block text-sm font-semibold text-gray-700 mb-2">{label}</label>
     <input
       {...props}
+      value={value?? ""}
       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
     />
   </div>

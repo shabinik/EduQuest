@@ -120,6 +120,15 @@ function TeacherLogin() {
 
                         <div className="mt-6 pt-6 border-t border-gray-200">
                             <p className="text-sm text-center text-gray-600">
+                                Forgot your password?{" "}
+                                <Link to="/forgot-password" className="text-indigo-600 hover:text-indigo-700 font-semibold hover:underline transition">
+                                    Reset it here
+                                </Link>
+                            </p>
+                        </div>
+
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                            <p className="text-sm text-center text-gray-600">
                                 Not a Teacher?{" "}
                                 <Link to="/" className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition">
                                     Back to Home

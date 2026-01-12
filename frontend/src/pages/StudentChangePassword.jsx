@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function StudentChangePassword() {
   const [oldPassword, setOld] = useState("");
@@ -37,7 +38,7 @@ export default function StudentChangePassword() {
         old_password: oldPassword,
         new_password: newPassword,
       });
-      alert("Password changed successfully!");
+      toast.success("Password changed successfully!");
       navigate("/student");
     } catch (err) {
       if (err.response?.status === 400) {

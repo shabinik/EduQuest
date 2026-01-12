@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
+import toast from "react-hot-toast";
 
 export default function SuperAdminSchools() {
   const [schools, setSchools] = useState([]);
@@ -33,7 +34,7 @@ export default function SuperAdminSchools() {
       await axiosInstance.post(`superadmin/tenants/${id}/status/`, { status });
       fetchSchools();
     } catch (err) {
-      alert("Failed to change status");
+      toast.error("Failed to change status");
     }
   };
 
@@ -43,7 +44,7 @@ export default function SuperAdminSchools() {
       await axiosInstance.delete(`superadmin/tenants/${id}/delete/`);
       fetchSchools();
     } catch (err) {
-      alert("Failed to delete school");
+      toast.error("Failed to delete school");
     }
   };
 

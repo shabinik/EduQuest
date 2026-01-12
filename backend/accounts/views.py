@@ -2,13 +2,14 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import permissions,status
 from rest_framework.response import Response
-from .serializers import LoginSerializer,UserSerializer,AdminSignupSerializer,AdminVerifyEmailSerializer,ChangePasswordSerializer,AdminProfileSerializer,AdminResendOtpSerializer
+from .serializers import LoginSerializer,UserSerializer,AdminSignupSerializer,AdminVerifyEmailSerializer,ChangePasswordSerializer,AdminProfileSerializer,AdminResendOtpSerializer,ForgotPasswordSerializer,ResetPasswordSerializer,ForgotPasswordResendOtpSerializer
 from django.conf import settings
 from . permissions import IsAdmin
 import cloudinary.uploader
 from rest_framework.parsers import MultiPartParser,FormParser
 from accounts.models import User
 from subscription.models import Subscription
+from rest_framework_simplejwt.tokens import RefreshToken
 
 # Create your views here.
 
@@ -76,10 +77,18 @@ class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self,request):
-        resp = Response({"detail":"Logged out"}, status= status.HTTP_200_OK)
-        resp.delete_cookie("access_token")
-        resp.delete_cookie("refresh_token")
-        return resp
+
+        try:
+            refresh_token = request.COOKIES.get("refresh_token")
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+        except Exception:
+            pass
+        response = Response({"detail":"Logged out Successfully"}, status= status.HTTP_200_OK)
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
+        return response
     
 
 class ProfileView(APIView):
@@ -183,3 +192,34 @@ class ChangePasswordView(APIView):
             user.save()
             return Response({"detail": "Password changed successfully."})
         return Response(serializer.errors, status=400)
+    
+
+class ForgotPasswordView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message": "OTP sent to your email."})
+    
+
+class ResetPasswordView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message": "Password reset successfully."})
+    
+
+class ForgotPasswordResendOtpView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = ForgotPasswordResendOtpSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message":"OTP resent"})
+    

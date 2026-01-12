@@ -107,6 +107,20 @@ export default function AdminSidebar() {
           <span className="text-xl">⚙️</span>
           <span>Profile</span>
         </NavLink>
+
+        <NavLink
+          to="/admin/change-password"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
+            }`
+          }
+        >
+          <span className="text-xl">🔐</span>
+          <span>Change Password</span>
+        </NavLink>
       </nav>
 
       {/* Logout */}

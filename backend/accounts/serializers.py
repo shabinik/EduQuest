@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 import random
 from . models import Tenant, EmailOtp
+from . otp_utils import send_otp
 
 User = get_user_model()
 
@@ -157,35 +158,19 @@ class AdminResendOtpSerializer(serializers.Serializer):
         return value
     
     def save(self):
-        user = self.user
-        
-        # Invalidate old OTPs
-        EmailOtp.objects.filter(user=user,is_used = False).update(is_used = True)
-        code = f"{random.randint(100000,999999)}"
-
-        EmailOtp.objects.create(
-            user = user,
-            email = user.email,
-            code = code,
-            expires_at=timezone.now() + timezone.timedelta(minutes=2)
-        )
-
-        send_mail (
-            subject="EduQuest | Verify Your Email",
-            message=(
-                f"Hello {user.full_name},\n\n"
-                "We received a request to verify your email for EduQuest.\n\n"
-                f"Your One-Time Password (OTP) is:\n\n"
-                f"   {code}\n\n"
-                "This OTP is valid for 2 minutes.\n"
-                "If you did not request this, please ignore this email.\n\n"
-                "Regards,\n"
-                "EduQuest Team"
-            ),
-            from_email= None,
-            recipient_list=[user.email],
-            fail_silently= False,
-        )
+        user = self.user       
+        subject="EduQuest | Verify Your Email",
+        message_template =(
+            "Hello {name},\n\n"
+            "We received a request to verify your email for EduQuest.\n\n"
+            "Your One-Time Password (OTP) is:\n\n"
+            "   {code}\n\n"
+            "This OTP is valid for 2 minutes.\n"
+            "If you did not request this, please ignore this email.\n\n"
+            "Regards,\n"
+            "EduQuest Team"
+        ),
+        send_otp(user,subject,message_template)
 
 
 class AdminVerifyEmailSerializer(serializers.Serializer):
@@ -279,3 +264,106 @@ class ChangePasswordSerializer(serializers.Serializer):
                 raise serializers.ValidationError({"old_password": "Old password is incorrect."})
         return data
         
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        try:
+            user = User.objects.get(email=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("No user found with this email.")
+        self.user = user
+        return value
+    
+    def save(self):
+        user = self.user
+        code = f"{random.randint(100000, 999999)}"
+
+        EmailOtp.objects.create(
+            user = user,
+            email = user.email,
+            code = code,
+            expires_at = timezone.now() + timezone.timedelta(minutes=5),
+        )
+
+        send_mail (
+            subject="EduQuest Password Reset OTP",
+            message=(
+                f"Hello {user.full_name},\n\n"
+                "We received a request to verify your email for EduQuest.\n\n"
+                f"Your password reset One-Time Password (OTP) is:\n\n"
+                f"   {code}\n\n"
+                "This OTP is valid for 2 minutes.\n"
+                "If you did not request this, please ignore this email.\n\n"
+                "Regards,\n"
+                "EduQuest Team"
+            ),
+            from_email= None,
+            recipient_list=[user.email],
+            fail_silently= False,
+        )
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(min_length=6)
+
+    def validate(self, data):
+        try:
+            otp_obj = EmailOtp.objects.filter(
+                email=data["email"],
+                code=data["otp"],
+                is_used=False
+            ).latest("created_at")
+        except EmailOtp.DoesNotExist:
+            raise serializers.ValidationError("Invalid or expired OTP.")
+
+        if not otp_obj.is_valid():
+            raise serializers.ValidationError("OTP expired or already used.")
+
+        data["otp_obj"] = otp_obj
+        return data
+
+    def save(self):
+        otp_obj = self.validated_data["otp_obj"]
+        user = otp_obj.user
+
+        user.set_password(self.validated_data["new_password"])
+        user.must_change_password = False
+        user.save()
+
+        otp_obj.is_used = True
+        otp_obj.save()
+
+        return user
+
+
+class ForgotPasswordResendOtpSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self,value):
+        try:
+            user = User.objects.get(email = value,is_active = True)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User not found")
+        
+        self.user = user
+        return value
+    
+    def save(self):
+        user = self.user
+        subject = "EduQuest | Reset Password OTP"
+        message_template = (
+            "Hello {name},\n\n"
+            "We received a request to verify your email for EduQuest.\n\n"
+            "Your password reset One-Time Password (OTP) is:\n\n"
+            "   {code}\n\n"
+            "This OTP is valid for 2 minutes.\n"
+            "If you did not request this, please ignore this email.\n\n"
+            "Regards,\n"
+            "EduQuest Team"
+        )
+        send_otp(user,subject,message_template)

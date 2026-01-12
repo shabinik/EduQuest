@@ -1,5 +1,6 @@
 import './App.css'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { Toaster } from "react-hot-toast"
 import SuperAdminLogin from './pages/SuperAdminLogin'
 import SuperAdminDash from './pages/SuperAdminDash'
 import SuperAdminPlans from './pages/SuperAdminPlans'
@@ -29,10 +30,42 @@ import AdminStudentDetail from './pages/AdminStudentDetail'
 import SuperAdminSchools from './pages/SuperAdminSchools'
 import RequireActiveSubscription from './guards/RequireActiveSubscription'
 import SuperAdminBilling from './pages/SuperAdminBilling'
+import ForgotPassword from './pages/ForgotPassword'
+import AdminChangePassword from './pages/AdminChangePassword'
 
 function App() {
   return (
     <BrowserRouter>
+    
+    {/* TOASTER */}
+      <Toaster 
+        position="top-right"
+        reverseOrder={false}
+        gutter={8}
+        toastOptions={{
+          duration: 3000,
+            style: {
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              fontSize: '14px',
+            },
+          success: {
+            style: {
+              background: '#10b981',
+              color: '#fff',
+            },
+          },
+          error: {
+            style: {
+              background: '#ef4444',
+              color: '#fff',
+            },
+          },
+        }}
+      />
+
+
+    {/* ROUTES */}
       <Routes>
         <Route path="/" element={<LoginLanding />} />
 
@@ -55,6 +88,7 @@ function App() {
           <Route path="students" element={<RequireActiveSubscription><StudentList/></RequireActiveSubscription>} />
           <Route path="students/:id" element={<RequireActiveSubscription><AdminStudentDetail/></RequireActiveSubscription>}/>
           <Route path="profile" element={<AdminProfile />} /> 
+          <Route path='change-password' element = {<AdminChangePassword />} />
         </Route>
         
         <Route path="/teacher/login" element={<TeacherLogin />} />
@@ -70,6 +104,8 @@ function App() {
           <Route path='profile' element={<StudentProfile />} />
           <Route path='change-password' element={<StudentChangePassword />}/>
         </Route>
+
+        <Route path='/forgot-password' element={<ForgotPassword/>} />
 
         <Route path = "*" element={<Navigate to="/login"/>} />
       </Routes>

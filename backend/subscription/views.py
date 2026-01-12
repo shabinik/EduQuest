@@ -134,7 +134,7 @@ class VerifyPaymentView(APIView):
         except Exception:
             payment.status = "failed"
             payment.save()
-            return Response({"error":"Signature verification failed"},status=400)
+            return Response({"error":"Signature verification failed"},status=status.HTTP_400_BAD_REQUEST)
         
         #update payment
         payment.status = "paid"
@@ -152,7 +152,12 @@ class VerifyPaymentView(APIView):
         tenant.status = "active"
         tenant.save()
 
-        return Response({"success":True,"message":"Payment verified"})
+        return Response({
+            "success":True,
+            "message":"Payment verified",
+            "has_active_subscription":True,
+            "expiry_date":subscription.expiry_date,
+        })
     
 
 class TenantSubscriptionsView(generics.ListAPIView):
@@ -164,7 +169,25 @@ class TenantSubscriptionsView(generics.ListAPIView):
         tenant = getattr(user,"tenant",None)
         if not tenant:
             return Subscription.objects.none()
-        return Subscription.objects.filter(tenant=tenant).order_by("-start_date")
+        return Subscription.objects.filter(tenant=tenant,is_active = True).order_by("-start_date")
 
+class SubscriptionStatusView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        tenant = request.user.tenant
+
+        has_active = Subscription.objects.filter(
+            tenant = tenant, is_active = True, expiry_date__gte = timezone.now()
+        ).exists()
+
+        sub = Subscription.objects.filter(tenant = tenant, is_active = True).first()
+
+        return Response({
+            "has_active_subscription": has_active,
+            "expiry_date": sub.expiry_date if sub else None
+        })
+    
+
+        
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate,Link } from "react-router-dom"
 import axiosInstance from "../api/axiosInstance"
+import toast from 'react-hot-toast'
 
 function AdminSignup() {
     const [step,setStep] = useState(1)
@@ -61,7 +62,7 @@ function AdminSignup() {
                 email:form.email,
                 otp,
             })
-            alert("Email verified! you can login now.")
+            toast.success("Email verified! you can login now.")
             navigate("/admin/login")
         } catch (err) {
             console.error(err)

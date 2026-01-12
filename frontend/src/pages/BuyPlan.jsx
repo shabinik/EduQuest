@@ -1,6 +1,7 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import axiosInstance from '../api/axiosInstance'
+import toast from 'react-hot-toast'
 
 function BuyPlan() {
     const [plans,setPlans] = useState([])
@@ -42,12 +43,24 @@ function BuyPlan() {
                         razorpay_payment_id:response.razorpay_payment_id,
                         razorpay_signature:response.razorpay_signature,
                     })
-                    .then(() => {
-                        alert("Payment Success and Subscription Activated!")
+                    .then((res) => {
+                        toast.success("Payment Success and Subscription Activated!")
+
+                        const user = JSON.parse(sessionStorage.getItem("user"))
+
+                        sessionStorage.setItem(
+                            "user",
+                            JSON.stringify({
+                                ...user,
+                                has_active_subscription: res.data.has_active_subscription,
+                                expiry_date: res.data.expiry_date,
+                            })
+                        )
+                        window.location.href = "/admin"
                         setProcessingPlan(null)
                     })
                     .catch(() => {
-                        alert("Payment verification failed. Please contact support.")
+                        toast.error("Payment verification failed. Please contact support.")
                         setProcessingPlan(null)
                     })
                 },
@@ -62,7 +75,7 @@ function BuyPlan() {
             rz.open()
         })
         .catch((err) => {
-            alert("Failed to create order. Please try again.")
+            toast.error("Failed to create order. Please try again.")
             setProcessingPlan(null)
         })
     }

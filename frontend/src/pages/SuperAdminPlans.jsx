@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import { useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function SuperAdminPlans() {
   const [plans, setPlans] = useState([]);
@@ -33,7 +34,7 @@ function SuperAdminPlans() {
       await axiosInstance.delete(`subscriptions/plans/${id}/`);
       fetchPlans();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to deactivate plan");
+      toast.error(err.response?.data?.message || "Failed to deactivate plan");
     }
   };
 

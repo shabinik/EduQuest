@@ -162,7 +162,7 @@ function AddStudentForm({ onCreated, onCancel }) {
   );
 }
 
-// Edid Student Page
+// Edit Student Page
 function EditStudentForm({ student, onUpdated, onCancel }) {
   const [form, setForm] = useState({
     full_name: student.full_name || "",
@@ -310,7 +310,9 @@ function EditStudentForm({ student, onUpdated, onCancel }) {
   );
 }
 
+
 // Student List
+
 export default function StudentList() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
