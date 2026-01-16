@@ -21,7 +21,7 @@ class Teacher(models.Model):
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_profile")
     admission_number = models.CharField(max_length=50, unique=True)
-    class_id = models.CharField(max_length=100)  # later replace with Class model FK
+    school_class = models.ForeignKey("classroom.SchoolClass",on_delete=models.SET_NULL,null=True,blank=True,related_name="students")
     roll_number = models.PositiveIntegerField()
     admission_date = models.DateField(default=timezone.now)
 

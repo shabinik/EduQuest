@@ -84,7 +84,7 @@ export default function AdminStudentDetail() {
                 <Detail label="Admission No" value={student.admission_number} />
                 <Detail label="Admission Date" value={student.admission_date} />
                 <Detail label="Roll Number" value={student.roll_number} />
-                <Detail label="Class" value={student.class_id} />
+                <Detail label="Class"value={student.school_class? `${student.school_class.name} - ${student.school_class.division}` : "—"}/>
               </div>
             </section>
           </div>

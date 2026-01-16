@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function AddStudentForm({ onCreated, onCancel }) {
   const [form, setForm] = useState({
     email: "",
     full_name: "",
     admission_number: "",
-    class_id: "",
+    school_class: "",
     roll_number: "",
   });
+  const [classes,setClasses] = useState([])
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    axiosInstance.get("classroom/classes/dropdown/")
+      .then(res => setClasses(res.data))
+  },[])
 
   const handleChange = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -34,12 +41,11 @@ function AddStudentForm({ onCreated, onCancel }) {
     }
 
     try {
-      await axiosInstance.post("users/students/create/", {...form,
-        full_name: form.full_name.trim(),
-        admission_number: form.admission_number.trim(),
-        class_id: form.class_id.trim(),
+      await axiosInstance.post("users/students/create/", {
+        ...form,
         roll_number: Number(form.roll_number),
       });
+      toast.success("Student Created successfully")
       onCreated();
     } catch (err) { 
       setError(
@@ -47,6 +53,7 @@ function AddStudentForm({ onCreated, onCancel }) {
           ? JSON.stringify(err.response.data)
           : "Failed to create student"
       );
+      toast.error("Failed to create student")
     } finally {
       setLoading(false);
     }
@@ -113,13 +120,20 @@ function AddStudentForm({ onCreated, onCancel }) {
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Class
             </label>
-            <input
-              name="class_id"
-              placeholder="Enter class"
+            <select
+              name="school_class"
+              value={form.school_class}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-            />
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">Select Class</option>
+              {classes.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.label} ({c.current_students}/{c.max_student})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -162,6 +176,8 @@ function AddStudentForm({ onCreated, onCancel }) {
   );
 }
 
+
+
 // Edit Student Page
 function EditStudentForm({ student, onUpdated, onCancel }) {
   const [form, setForm] = useState({
@@ -169,12 +185,18 @@ function EditStudentForm({ student, onUpdated, onCancel }) {
     phone: student.phone || "",
     guardian_name: student.guardian_name || "",
     guardian_contact: student.guardian_contact || "",
-    class_id: student.class_id || "",
+    school_class: student.school_class?.id || "",
     roll_number: student.roll_number || "",
   });
 
+  const [classes,setClasses] = useState([])
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    axiosInstance.get("classroom/classes/dropdown/")
+      .then(res => setClasses(res.data))
+  },[])
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -184,9 +206,11 @@ function EditStudentForm({ student, onUpdated, onCancel }) {
     setError("");
     try {
       await axiosInstance.put(`users/students/update/${student.id}/`, form);
+      toast.success("Student Updated successfully")
       onUpdated();
     } catch (err) {
       setError("Failed to update student");
+      toast.error("Failed to update student")
     } finally {
       setSaving(false);
     }
@@ -263,13 +287,20 @@ function EditStudentForm({ student, onUpdated, onCancel }) {
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Class
             </label>
-            <input
-              name="class_id"
-              value={form.class_id}
+            <select
+              name="school_class"
+              value={form.school_class}
               onChange={handleChange}
-              placeholder="Enter class"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-            />
+              required
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">Select Class</option>
+              {classes.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.label} ({c.current_students}/{c.max_student})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

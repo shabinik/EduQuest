@@ -32,6 +32,9 @@ import RequireActiveSubscription from './guards/RequireActiveSubscription'
 import SuperAdminBilling from './pages/SuperAdminBilling'
 import ForgotPassword from './pages/ForgotPassword'
 import AdminChangePassword from './pages/AdminChangePassword'
+import ClassList from './pages/ClassList'
+import ClassDetail from './pages/ClassDetail'
+import TeacherClassView from './pages/TeacherClassView'
 
 function App() {
   return (
@@ -89,6 +92,8 @@ function App() {
           <Route path="students/:id" element={<RequireActiveSubscription><AdminStudentDetail/></RequireActiveSubscription>}/>
           <Route path="profile" element={<AdminProfile />} /> 
           <Route path='change-password' element = {<AdminChangePassword />} />
+          <Route path='classes' element={<RequireActiveSubscription><ClassList/></RequireActiveSubscription>} />
+          <Route path='classes/:id' element={<RequireActiveSubscription><ClassDetail/></RequireActiveSubscription>} />
         </Route>
         
         <Route path="/teacher/login" element={<TeacherLogin />} />
@@ -96,6 +101,7 @@ function App() {
           <Route index element = {<RequireActiveSubscription><TeacherDashboard/></RequireActiveSubscription>} />
           <Route path='profile' element={<TeacherProfile/>}/>
           <Route path='change-password' element={<TeacherChangePassword />}/>
+          <Route path='class' element={<RequireActiveSubscription><TeacherClassView /></RequireActiveSubscription>} />
         </Route>
 
         <Route path='/student/login' element={<StudentLogin />} />

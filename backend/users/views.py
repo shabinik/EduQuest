@@ -9,6 +9,7 @@ from accounts.permissions import IsAdmin,HasActiveSubscription
 from . models import Teacher,Student
 from subscription.models import Subscription
 from users.models import Student
+from classroom.models import SchoolClass
 
 
 # Create your views here.
@@ -178,7 +179,7 @@ class UpdateStudentView(APIView):
 
     def put(self, request, student_id):
         try:
-            student = Student.objects.select_related("user").get(
+            student = Student.objects.select_related("user","school_class").get(
                 id = student_id,
                 user__tenant = request.user.tenant
             )
@@ -193,8 +194,26 @@ class UpdateStudentView(APIView):
 
         student.guardian_name = data.get("guardian_name", student.guardian_name)
         student.guardian_contact = data.get("guardian_contact", student.guardian_contact)
-        student.class_id = data.get("class_id", student.class_id)
         student.roll_number = data.get("roll_number", student.roll_number)
+        new_class_id = data.get("school_class")
+
+        if new_class_id:
+            try:
+                new_class = SchoolClass.objects.get(
+                    id=new_class_id,
+                    tenant = request.user.tenant,
+                    is_active = True
+                )
+            except SchoolClass.DoesNotExist:
+                return Response({"detail": "Invalid class selected"},status=status.HTTP_400_BAD_REQUEST)
+            
+            if (student.school_class != new_class and new_class.students.count() >= new_class.max_student):
+                return Response(
+                    {"detail": f"Class capacity reached ({new_class.max_student})"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            student.school_class = new_class
+            
         student.save()
 
         return Response({"success":True})

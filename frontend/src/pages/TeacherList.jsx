@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
+import toast from 'react-hot-toast';
 
 function AddTeacherForm({ onCreated, onCancel }) {
   const [form, setForm] = useState({
@@ -56,7 +57,7 @@ function AddTeacherForm({ onCreated, onCancel }) {
         joining_date: "",
         salary: "",
       });
-
+      toast.success("Create Teacher successfully")
       onCreated && onCreated();
 
     } catch (err) {
@@ -71,6 +72,7 @@ function AddTeacherForm({ onCreated, onCancel }) {
         );
       } else {
         setError("Something went wrong. Please try again.");
+        toast.error("Something went wrong. Please try again.")
       }
     } finally {
       setLoading(false);
@@ -238,11 +240,13 @@ function EditTeacherForm({ teacher, onUpdated, onCancel }) {
           salary: form.salary || 0,
         }
       );
-      setLoading(false);
+      toast.success("Teacher Updated Successfully")
       onUpdated && onUpdated();
     } catch (err) {
-      setLoading(false);
       setError("Failed to update teacher");
+      toast.error("Failed to update teacher")
+    } finally {
+      setLoading(false)
     }
   };
 

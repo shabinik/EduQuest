@@ -111,33 +111,20 @@ class AdminSignupSerializer(serializers.Serializer):
         )
         user.set_password(password)
         user.save()
-
-        #GENEARTE OTP
-        code = f"{random.randint(100000,999999)}"
-        otp = EmailOtp.objects.create(
-            user = user,
-            email = email,
-            code = code,
-            expires_at = timezone.now() + timezone.timedelta(minutes=2)
-        )
-
+        
         #SEND OTP VIA EMAIL
-        send_mail(
-            subject="EduQuest Admin Email Verification",
-            message=(
-                f"Hello {user.full_name},\n\n"
-                "We received a request to verify your email for EduQuest.\n\n"
-                f"Your One-Time Password (OTP) is:\n\n"
-                f"   {code}\n\n"
-                "This OTP is valid for 2 minutes.\n"
-                "If you did not request this, please ignore this email.\n\n"
-                "Regards,\n"
-                "EduQuest Team"
-            ),
-            from_email=None, 
-            recipient_list=[email],
-            fail_silently=True,
-        )
+        subject="EduQuest Admin Email Verification",
+        message_template=(
+            "Hello {name},\n\n"
+            "We received a request to verify your email for EduQuest.\n\n"
+            "Your One-Time Password (OTP) is:\n\n"
+            "   {code}\n\n"
+            "This OTP is valid for 2 minutes.\n"
+            "If you did not request this, please ignore this email.\n\n"
+            "Regards,\n"
+            "EduQuest Team"
+        ),
+        send_otp(user,subject,message_template)
 
         return user
     

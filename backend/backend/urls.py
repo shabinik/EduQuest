@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/subscriptions/',include('subscription.urls')),
     path('api/users/',include('users.urls')),
     path('api/superadmin/',include('superadmin.urls')),
+    path('api/classroom/',include('classroom.urls')),
 ]

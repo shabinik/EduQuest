@@ -9,6 +9,7 @@ import string
 from . models import Teacher,Student
 from accounts.models import Tenant
 import re
+from classroom.models import SchoolClass
 
 User = get_user_model()
 
@@ -146,8 +147,12 @@ class StudentCreateSerializer(serializers.Serializer):
     email = serializers.EmailField()
     full_name = serializers.CharField(max_length=225)
     admission_number = serializers.CharField(max_length=50)
-    class_id = serializers.CharField(max_length=100)
+    school_class = serializers.PrimaryKeyRelatedField(
+        queryset=SchoolClass.objects.all(),
+        required = True
+    )
     roll_number = serializers.IntegerField(min_value=1)
+
 
     # ---------- FIELD VALIDATIONS ----------
 
@@ -183,12 +188,6 @@ class StudentCreateSerializer(serializers.Serializer):
 
         return value
 
-    def validate_class_id(self, value):
-        if not value.strip():
-            raise serializers.ValidationError(
-                "Class cannot be empty."
-            )
-        return value.strip()
 
     def validate_roll_number(self, value):
         if value <= 0:
@@ -196,12 +195,26 @@ class StudentCreateSerializer(serializers.Serializer):
                 "Roll number must be a positive integer."
             )
         return value
+    
+    def validate_school_class(self, school_class):
+        request = self.context["request"]
+        tenant = request.user.tenant
 
+        if school_class.tenant != tenant:
+            raise serializers.ValidationError("Invalid class selection.")
+
+        if school_class.students.count() >= school_class.max_student:
+            raise serializers.ValidationError(
+                f"Class capacity reached ({school_class.max_student})."
+            )
+        
+        return school_class
     # ---------- CREATE ----------
 
     def create(self, validated_data):
-        request = self.context.get("request")
+        request = self.context["request"]
         admin_user = request.user
+        tenant = admin_user.tenant
 
         if not admin_user.tenant:
             raise serializers.ValidationError(
@@ -226,7 +239,7 @@ class StudentCreateSerializer(serializers.Serializer):
             student = Student.objects.create(
                 user=user,
                 admission_number=validated_data["admission_number"],
-                class_id=validated_data["class_id"],
+                school_class=validated_data["school_class"],
                 roll_number=validated_data["roll_number"],
             )
 
@@ -259,7 +272,7 @@ class StudentListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ["id", "profile_image","full_name", "email", "phone", "admission_number", "class_id", "roll_number"]
+        fields = ["id", "profile_image","full_name", "email", "phone", "admission_number", "school_class", "roll_number"]
 
 
 class StudentDetailSerializer(serializers.ModelSerializer):
@@ -269,6 +282,7 @@ class StudentDetailSerializer(serializers.ModelSerializer):
     gender = serializers.CharField(source="user.gender", allow_null=True)
     DOB = serializers.DateField(source="user.DOB", allow_null=True)
     profile_image = serializers.CharField(source="user.profile_image", allow_null=True)
+    school_class = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
@@ -281,12 +295,22 @@ class StudentDetailSerializer(serializers.ModelSerializer):
             "gender",
             "DOB",
             "admission_number",
-            "class_id",
+            "school_class",
             "roll_number",
             "admission_date",
             "guardian_name",
             "guardian_contact",
         ]
+    
+    def get_school_class(self, obj):
+        if not obj.school_class:
+            return None
+        return {
+            "id": obj.school_class.id,
+            "name": obj.school_class.name,
+            "division": obj.school_class.division,
+            "academic_year": obj.school_class.academic_year,
+        }
 
        
 class StudentProfileSerializer(serializers.ModelSerializer):
@@ -304,13 +328,13 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             "phone",
             "profile_image",
             "admission_number",
-            "class_id",
+            "school_class",
             "roll_number",
             "guardian_name",
             "guardian_contact",
             "admission_date",
         ]
-        read_only_fields = ["admission_number", "class_id", "roll_number","profile_image"]
+        read_only_fields = ["admission_number", "school_class", "roll_number","profile_image"]
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop("user", {})
