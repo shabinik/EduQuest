@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'users',
     'superadmin',
     'classroom',
+    'academics',
     'cloudinary',
     'cloudinary_storage',
     "rest_framework_simplejwt.token_blacklist",

@@ -1,40 +1,43 @@
 import './App.css'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { Toaster } from "react-hot-toast"
-import SuperAdminLogin from './pages/SuperAdminLogin'
-import SuperAdminDash from './pages/SuperAdminDash'
-import SuperAdminPlans from './pages/SuperAdminPlans'
-import CreatePlan from './pages/CreatePlan'
-import SuperAdminLayout from './pages/SuperAdminLayout'
-import BuyPlan from './pages/BuyPlan'
-import EditPlan from './pages/EditPlan'
-import AdminLogin from './pages/AdminLogin'
-import AdminSignup from './pages/AdminSignup'
-import AdminLayout from './pages/AdminLayout'
-import AdminDashboard from './pages/AdminDashboard'
-import TeacherList from './pages/TeacherList'
+import SuperAdminLogin from './pages/superadmin/SuperAdminLogin'
+import SuperAdminDash from './pages/superadmin/SuperAdminDash'
+import SuperAdminPlans from './pages/superadmin/SuperAdminPlans'
+import CreatePlan from './pages/superadmin/CreatePlan'
+import SuperAdminLayout from './pages/superadmin/SuperAdminLayout'
+import BuyPlan from './pages/admin/BuyPlan'
+import EditPlan from './pages/superadmin/EditPlan'
+import AdminLogin from './pages/admin/AdminLogin'
+import AdminSignup from './pages/admin/AdminSignup'
+import AdminLayout from './pages/admin/AdminLayout'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import TeacherList from './pages/admin/TeacherList'
 import LoginLanding from './pages/LoginLanding'
-import TeacherLayout from './pages/TeacherLayout'
-import TeacherDashboard from './pages/TeacherDashboard'
-import TeacherProfile from './pages/TeacherProfile'
-import TeacherChangePassword from './pages/TeacherChangePassword'
-import TeacherLogin from './pages/TeacherLogin'
-import StudentList from './pages/StudentList'
-import StudentLogin from './pages/StudentLogin'
-import StudentLayout from './pages/StudentLayout'
-import StudentDashboard from './pages/StudentDashboard'
-import StudentProfile from './pages/StudentProfile'
-import StudentChangePassword from './pages/StudentChangePassword'
-import AdminProfile from './pages/AdminProfile'
-import AdminStudentDetail from './pages/AdminStudentDetail'
-import SuperAdminSchools from './pages/SuperAdminSchools'
+import TeacherLayout from './pages/teacher/TeacherLayout'
+import TeacherDashboard from './pages/teacher/TeacherDashboard'
+import TeacherProfile from './pages/teacher/TeacherProfile'
+import TeacherChangePassword from './pages/teacher/TeacherChangePassword'
+import TeacherLogin from './pages/teacher/TeacherLogin'
+import StudentList from './pages/admin/StudentList'
+import StudentLogin from './pages/student/StudentLogin'
+import StudentLayout from './pages/student/StudentLayout'
+import StudentDashboard from './pages/student/StudentDashboard'
+import StudentProfile from './pages/student/StudentProfile'
+import StudentChangePassword from './pages/student/StudentChangePassword'
+import AdminProfile from './pages/admin/AdminProfile'
+import AdminStudentDetail from './pages/admin/AdminStudentDetail'
+import SuperAdminSchools from './pages/superadmin/SuperAdminSchools'
 import RequireActiveSubscription from './guards/RequireActiveSubscription'
-import SuperAdminBilling from './pages/SuperAdminBilling'
+import SuperAdminBilling from './pages/superadmin/SuperAdminBilling'
 import ForgotPassword from './pages/ForgotPassword'
-import AdminChangePassword from './pages/AdminChangePassword'
-import ClassList from './pages/ClassList'
-import ClassDetail from './pages/ClassDetail'
-import TeacherClassView from './pages/TeacherClassView'
+import AdminChangePassword from './pages/admin/AdminChangePassword'
+import ClassList from './pages/admin/ClassList'
+import ClassDetail from './pages/admin/ClassDetail'
+import TeacherClassView from './pages/teacher/TeacherClassView'
+import AdminAnnouncementList from './pages/admin/AdminAnnouncementList'
+
+
 
 function App() {
   return (
@@ -93,6 +96,7 @@ function App() {
           <Route path="profile" element={<AdminProfile />} /> 
           <Route path='change-password' element = {<AdminChangePassword />} />
           <Route path='classes' element={<RequireActiveSubscription><ClassList/></RequireActiveSubscription>} />
+          <Route path='announcements' element={<RequireActiveSubscription><AdminAnnouncementList/></RequireActiveSubscription>} />
           <Route path='classes/:id' element={<RequireActiveSubscription><ClassDetail/></RequireActiveSubscription>} />
         </Route>
         
