@@ -36,6 +36,7 @@ import ClassList from './pages/admin/ClassList'
 import ClassDetail from './pages/admin/ClassDetail'
 import TeacherClassView from './pages/teacher/TeacherClassView'
 import AdminAnnouncementList from './pages/admin/AdminAnnouncementList'
+import AdminTimeTable from './pages/admin/AdminTimeTable'
 
 
 
@@ -98,6 +99,7 @@ function App() {
           <Route path='classes' element={<RequireActiveSubscription><ClassList/></RequireActiveSubscription>} />
           <Route path='announcements' element={<RequireActiveSubscription><AdminAnnouncementList/></RequireActiveSubscription>} />
           <Route path='classes/:id' element={<RequireActiveSubscription><ClassDetail/></RequireActiveSubscription>} />
+          <Route path='timetable' element={<RequireActiveSubscription><AdminTimeTable/></RequireActiveSubscription>} />
         </Route>
         
         <Route path="/teacher/login" element={<TeacherLogin />} />

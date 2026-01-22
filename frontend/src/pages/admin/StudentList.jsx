@@ -536,7 +536,7 @@ export default function StudentList() {
 
                       <td className="px-6 py-4 text-center">
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700">
-                          {s.class_id}
+                          {s.school_class? `${s.school_class.name} - ${s.school_class.division}` : "—"}
                         </span>
                       </td>
 

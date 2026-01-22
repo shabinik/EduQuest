@@ -269,10 +269,20 @@ class StudentListSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source="user.email")
     phone = serializers.CharField(source="user.phone",allow_null=True)
     profile_image = serializers.CharField(source="user.profile_image", allow_null=True)
+    school_class = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
         fields = ["id", "profile_image","full_name", "email", "phone", "admission_number", "school_class", "roll_number"]
+
+    def get_school_class(self, obj):
+        if not obj.school_class:
+            return None
+        return {
+            "id": obj.school_class.id,
+            "name": obj.school_class.name,
+            "division": obj.school_class.division,
+        }
 
 
 class StudentDetailSerializer(serializers.ModelSerializer):

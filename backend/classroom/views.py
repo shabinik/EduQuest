@@ -1,11 +1,14 @@
 from django.shortcuts import render
 from rest_framework.views import APIView 
 from accounts.permissions import IsAdmin,HasActiveSubscription,IsTeacher
-from . serializers import ClassSerializer
+from . serializers import ClassSerializer,SubjectSerializer,TimeSlotSerializer,TimeTableSerializer,TimeTableEntrySerializer
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-from . models import SchoolClass
+from rest_framework import status,viewsets, exceptions
+from . models import SchoolClass,Subject,TimeSlot,TimeTable,TimeTableEntry
+from rest_framework import generics 
+from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404 
 
 # Create your views here.
 
@@ -178,3 +181,130 @@ class TeacherClassView(APIView):
                 for s in school_class.students.all()
             ]
          })
+    
+
+
+class BaseTenantViewSet(viewsets.ModelViewSet):
+    """
+    Base ViewSet that handles:
+    1. Tenant filtering (data isolation)
+    2. Tenant assignment on creation
+    3. Global Permission checks (Auth, Admin role, Subscription status)
+    """
+
+    permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]
+     
+    def get_queryset(self):
+        return self.queryset.filter(tenant = self.request.user.tenant)
+    
+    def perform_create(self, serializer):
+        serializer.save(tenant = self.request.user.tenant)
+
+    
+
+class SubjectViewSet(BaseTenantViewSet):
+    queryset = Subject.objects.all()
+    serializer_class = SubjectSerializer
+    permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]
+
+
+class TimeSlotViewSet(BaseTenantViewSet):
+    queryset = TimeSlot.objects.all()
+    serializer_class = TimeSlotSerializer
+
+
+
+class TimeTableViewSet(BaseTenantViewSet):
+    queryset = TimeTable.objects.all()
+    serializer_class = TimeTableSerializer
+
+    @action(detail=False, methods=['get', 'post'], url_path='fetch-or-create')
+    def get_by_class(self, request):
+        tenant = request.user.tenant
+
+        class_id = request.query_params.get('class_id') or request.data.get('class_id')
+
+        if not class_id:
+            return Response(
+                {"error": "class id is requiered"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        school_class = get_object_or_404(SchoolClass, id=class_id,tenant=tenant)
+
+        timetable, created = TimeTable.objects.get_or_create(
+            tenant = tenant,
+            school_class = school_class
+        )
+
+        serializer = self.get_serializer(timetable)
+        return Response(serializer.data, status = status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['get'])
+    def matrix(self, request, pk = None):
+        # Returns the timetable data structured as a dictionary
+
+        timetable = self.get_object()
+
+        entries = timetable.entries.select_related('subject','teacher__user','slot').all()
+
+        matrix_data = {}
+
+        for entry in entries:
+            day = entry.day
+            slot_id = entry.slot.id
+
+            if day not in matrix_data:
+                matrix_data[day] = {}
+            
+            # This object matches what you need to show in the cell
+
+            matrix_data[day][slot_id] = {
+                "id" : entry.id,
+                "subject" : entry.subject.name,
+                "subject_id" : entry.subject.id,
+                "teacher" : entry.teacher.user.full_name,
+                "teacher_id" : entry.teacher.id,
+                "start_time" : entry.slot.start_time,
+                "end_time" : entry.slot.end_time
+            }
+        
+        return Response(matrix_data)
+    
+    
+            
+
+
+class TimeTableEntryViewSet(BaseTenantViewSet):
+    queryset = TimeTableEntry.objects.all()
+    serializer_class = TimeTableEntrySerializer
+
+    def get_queryset(self):
+
+        queryset = super().get_queryset()
+        timetable_id = self.request.query_params.get('timetable_id')
+
+        if timetable_id:
+            queryset = queryset.filter(timetable_id = timetable_id)
+
+        return queryset
+
+    @action(detail=False, methods=['post'], url_path='clear-timetable')
+    def clear_timetable(self, request):
+        """Removes all entries for a specific timetable grid."""
+        timetable_id = request.data.get('timetable_id')
+
+        if not timetable_id:
+            return Response({"error": "timetable_id is required"}, status=400)
+        
+        deleted_count, _ = TimeTableEntry.objects.filter(
+            tenant = request.user.tenant,
+            timetable_id = timetable_id
+        ).delete()
+        return Response({
+            "message": f"Cleared {deleted_count} entries.",
+            "status": "success"
+        }, status=status.HTTP_200_OK)
+    
+
+    
