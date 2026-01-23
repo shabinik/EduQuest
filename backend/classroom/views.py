@@ -308,3 +308,95 @@ class TimeTableEntryViewSet(BaseTenantViewSet):
     
 
     
+class StudentTimeTableView(APIView):
+    permission_classes = [IsAuthenticated,HasActiveSubscription]
+
+    def get(self, request):
+        user = request.user
+
+        if not hasattr(user, "student_profile"):
+            return Response({"detail": "Student profile not found"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        student = user.student_profile
+        tenant = user.tenant
+        school_class = student.school_class
+
+        if not school_class:
+            return Response({"detail": "Student not assigned to class"}, status=400)
+
+        timetable = get_object_or_404(TimeTable,tenant=tenant,school_class = school_class)
+        
+        if not timetable:
+            return Response({
+                "class_name": school_class.name,
+                "division": school_class.division,
+                "matrix": {}
+            })
+
+        
+        slots = TimeSlot.objects.filter(tenant = tenant).order_by("start_time")
+
+        matrix = {}
+        
+        if timetable:
+            entries = timetable.entries.select_related(
+                "subject", "teacher__user", "slot"
+            )
+
+            for entry in entries:
+                matrix.setdefault(entry.day, {})[entry.slot.id] = {
+                    "subject": entry.subject.name,
+                    "teacher": entry.teacher.user.full_name,
+                }
+
+        return Response({
+            "class_name" : school_class.name,
+            "division": school_class.division,
+            "slots": [
+                {
+                    "id": s.id,
+                    "start_time": s.start_time,
+                    "end_time": s.end_time,
+                    "is_break": s.is_break,
+                }
+                for s in slots
+            ],
+            "matrix": matrix
+        })
+    
+
+
+class TeacherTimeTableView(APIView):
+    permission_classes = [IsAuthenticated, HasActiveSubscription,IsTeacher]
+
+    def get(self, request):
+        user = request.user
+        tenant = user.tenant
+
+        if not hasattr(user, "teacher_profile"):
+            return Response(
+                {"detail": "Teacher Profile not found"},
+                status= status.HTTP_400_BAD_REQUEST
+            )
+        teacher = user.teacher_profile
+
+        entries = (TimeTableEntry.objects
+                   .filter(tenant = tenant,teacher = teacher, slot__is_break = False)
+                   .select_related("subject", "slot", "timetable__school_class")
+                   .order_by("day", "slot__start_time"))
+        
+        timetable = {}
+
+        for entry in entries:
+            timetable.setdefault(entry.day, []).append({
+                "subject": entry.subject.name,
+                "class_name": entry.timetable.school_class.name,
+                "division": entry.timetable.school_class.division,
+                "start_time": entry.slot.start_time,
+                "end_time": entry.slot.end_time,
+            })
+ 
+        return Response({
+            "teacher":user.full_name,
+            "timetable":timetable
+        })

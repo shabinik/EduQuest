@@ -328,6 +328,8 @@ class StudentProfileSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="user.full_name", required=False)
     phone = serializers.CharField(source="user.phone", required=False)
     profile_image = serializers.CharField(source='user.profile_image',read_only=True,required=False)
+    class_name = serializers.CharField(source = 'school_class.name', read_only = True)
+    division = serializers.CharField(source = 'school_class.division', read_only = True)
 
 
     class Meta:
@@ -343,6 +345,8 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             "guardian_name",
             "guardian_contact",
             "admission_date",
+            "class_name",
+            "division"
         ]
         read_only_fields = ["admission_number", "school_class", "roll_number","profile_image"]
 

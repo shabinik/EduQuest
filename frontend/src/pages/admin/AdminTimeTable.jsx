@@ -21,7 +21,11 @@ const TimeSlotSetup = ({ slots, onRefresh }) => {
       }
       resetForm();
       onRefresh();
-    } catch (error) { toast.error("Conflict or Invalid Time: " + JSON.stringify(error.response?.data)); }
+      toast.success("Time slot saved");
+    } catch (error) { 
+      const msg = error.response?.data ? Object.values(error.response.data).flat()[0] : "Invalid Time";
+      toast.error(msg); 
+    }
   };
 
   const handleDelete = async (id) => {
@@ -79,17 +83,19 @@ const TimeSlotSetup = ({ slots, onRefresh }) => {
   );
 };
 
-
-
-
 const SubjectSetup = ({ subjects, onRefresh }) => {
   const [name, setName] = useState('');
   const [editId, setEditId] = useState(null);
 
   const handleSave = async () => {
-    if (editId) await axiosInstance.put(`classroom/subjects/${editId}/`, { name });
-    else await axiosInstance.post('classroom/subjects/', { name });
-    setName(''); setEditId(null); onRefresh();
+    try {
+        if (editId) await axiosInstance.put(`classroom/subjects/${editId}/`, { name });
+        else await axiosInstance.post('classroom/subjects/', { name });
+        setName(''); setEditId(null); onRefresh();
+        toast.success("Subject saved");
+    } catch (e) {
+        toast.error(e.response?.data?.name?.[0] || "Error saving subject");
+    }
   };
 
   return (
@@ -112,9 +118,6 @@ const SubjectSetup = ({ subjects, onRefresh }) => {
     </div>
   );
 };
-
-
-
 
 // --- MAIN COMPONENT ---
 
@@ -167,6 +170,12 @@ const AdminTimeTable = () => {
   };
 
   const handleSaveEntry = async () => {
+    // PRE-SUBMISSION VALIDATION
+    if (!formData.subject || !formData.teacher) {
+        toast.error("You have to select both a Teacher and a Subject.");
+        return;
+    }
+
     const payload = {
         timetable: activeTimetable.id,
         day: modalData.day,
@@ -174,6 +183,7 @@ const AdminTimeTable = () => {
         subject: formData.subject,
         teacher: formData.teacher
     };
+
     try {
       if (modalData.entryId) {
         await axiosInstance.put(`classroom/timetable-entries/${modalData.entryId}/`, payload);
@@ -182,7 +192,50 @@ const AdminTimeTable = () => {
       }
       fetchMatrix(activeTimetable.id);
       setShowEntryModal(false);
-    } catch (e) { toast.error("Conflict: This teacher/class is busy at this time."); }
+      toast.success("Period updated successfully");
+    } catch (e) { 
+        // EXTRACT SPECIFIC ERROR MESSAGE FROM BACKEND
+        const errorData = e.response?.data;
+        if (errorData) {
+            const firstError = Object.values(errorData).flat()[0];
+            toast.error(firstError || "Error saving period");
+        } else {
+            toast.error("Conflict: This teacher or class is busy at this time.");
+        }
+    }
+  };
+
+  const handleCreateTimetable = async () => {
+    if (!selectedClassId) {
+      toast.error("Please select a class");
+      return;
+    }
+
+    // FRONTEND PRE-CHECK: DOES THIS CLASS ALREADY HAVE A TIMETABLE IN OUR LIST?
+    const alreadyExists = timetables.some(tt => tt.school_class === parseInt(selectedClassId));
+    if (alreadyExists) {
+        toast.error("This class already has a timetable.");
+        return;
+    }
+
+    try {
+      const res = await axiosInstance.post('classroom/timetables/', {
+        school_class: selectedClassId
+      });
+    
+      toast.success("Timetable created successfully!");
+      setShowCreateModal(false);
+      setSelectedClassId('');
+      fetchInitialData(); 
+    
+      setActiveTimetable(res.data);
+      fetchMatrix(res.data.id);
+      setView('grid');
+    } catch (error) {
+      // HANDLE BACKEND VALIDATION MESSAGE
+      const msg = error.response?.data?.non_field_errors?.[0] || error.response?.data?.[0] || "This class already has a timetable.";
+      toast.error(msg);
+    }
   };
 
   const handleDeleteEntry = async () => {
@@ -190,6 +243,7 @@ const AdminTimeTable = () => {
         await axiosInstance.delete(`classroom/timetable-entries/${modalData.entryId}/`);
         fetchMatrix(activeTimetable.id);
         setShowEntryModal(false);
+        toast.success("Period cleared");
     }
   };
 
@@ -239,6 +293,9 @@ const AdminTimeTable = () => {
                         </td>
                       </tr>
                     ))}
+                    {timetables.length === 0 && (
+                        <tr><td colSpan="2" className="p-10 text-center text-gray-400">No timetables found. Add your first one!</td></tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -330,8 +387,53 @@ const AdminTimeTable = () => {
                 </div>
               </div>
             </div>
+          </div>          
+        )}
+
+        {/* Create Timetable Modal */}
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-md p-8 shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold">Create New Timetable</h3>
+                <button onClick={() => setShowCreateModal(false)} className="text-gray-400">
+                  <X size={20}/>
+                </button>
+              </div>
+      
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Select Class & Division</label>
+                  <select 
+                    className="w-full border border-gray-200 rounded-lg p-3 mt-1 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    value={selectedClassId}
+                    onChange={(e) => setSelectedClassId(e.target.value)}
+                  >
+                    <option value="">Choose a class...</option>
+                    {classes.map(cls => (
+                      <option key={cls.id} value={cls.id}>
+                        {cls.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-gray-400 mt-2 italic">
+                    Note: Only classes without an existing timetable will appear or work.
+                  </p>
+                </div>
+
+                <div className="pt-4">
+                  <button 
+                    onClick={handleCreateTimetable}
+                    className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+                  >
+                    <Plus size={18}/> Create Timetable
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
+
       </div>
     </div>
   );

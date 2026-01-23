@@ -24,5 +24,6 @@ urlpatterns = [
     path('api/users/',include('users.urls')),
     path('api/superadmin/',include('superadmin.urls')),
     path('api/classroom/',include('classroom.urls')),
-    path('api/academics/',include('academics.urls'))
+    path('api/academics/',include('academics.urls')),
+    path('api/assignment/',include('assignment.urls'))
 ]

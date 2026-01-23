@@ -130,7 +130,7 @@ export default function StudentProfile() {
                     <div className="bg-indigo-50 rounded-xl p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                       <Info label="Admission No" value={profile.admission_number} />
                       <Info label="Roll Number" value={profile.roll_number} />
-                      <Info label="Class" value={profile.class_id} />
+                      <Info label="Class" value={profile.class_name? `${profile.class_name}${profile.division? "-" + profile.division : ""}` : "--"}  />
                       <Info label="Admission Date" value={profile.admission_date} />
                     </div>
                   </section>

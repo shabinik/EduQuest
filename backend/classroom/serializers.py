@@ -129,7 +129,16 @@ class TimeTableSerializer(serializers.ModelSerializer):
         fields = ["id", "school_class", "class_name", "division"]
         read_only_fields = ["id", "created_at"]
 
-    
+    def validate(self, attrs):
+        request = self.context.get("request")
+        tenant = request.user.tenant
+        school_class = attrs.get('school_class')
+
+        if TimeTable.objects.filter(tenant = tenant, school_class = school_class).exists():
+            raise serializers.ValidationError("This class already has a timetable.")
+
+        return attrs
+   
 
 class TimeTableEntrySerializer(serializers.ModelSerializer):
     subject_name = serializers.CharField(source = "subject.name",read_only = True)
@@ -159,12 +168,11 @@ class TimeTableEntrySerializer(serializers.ModelSerializer):
             return data
         
         if not data.get("subject"):
-            raise serializers.ValidationError(
-                "Subject is required for class slots."
-            )
+            raise serializers.ValidationError({"subject":"Subject is required for class slots."})
+        
 
         if not data.get("teacher"):
-            raise serializers.ValidationError("Teacher is required for class slots.")
+            raise serializers.ValidationError({"teacher":"Teacher is required for class slots."})
         
         # Check Teacher Availability (Teacher cannot be in two places at once)
         teacher_overlap = TimeTableEntry.objects.filter(
@@ -178,9 +186,9 @@ class TimeTableEntrySerializer(serializers.ModelSerializer):
             teacher_overlap = teacher_overlap.exclude(id = self.instance.id)
 
         if teacher_overlap.exists():
-            raise serializers.ValidationError(
-                "This teacher is already assigned to another class at this time"
-            )
+            raise serializers.ValidationError({
+                "teacher":"This teacher is already assigned to another class at this time"
+            })
         
         # Check Class Availability (Class cannot have two subjects at same time)
         class_overlap = TimeTableEntry.objects.filter(
@@ -194,9 +202,9 @@ class TimeTableEntrySerializer(serializers.ModelSerializer):
             class_overlap = class_overlap.exclude(id = self.instance.id)
 
         if class_overlap.exists():
-            raise serializers.ValidationError(
-                "This class already has a subject assigned at this slot."
-            )    
+            raise serializers.ValidationError({
+                "slot":"This class already has a subject assigned at this slot."
+            })    
         
         return data
     

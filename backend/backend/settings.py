@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'superadmin',
     'classroom',
     'academics',
+    'assignment',
     'cloudinary',
     'cloudinary_storage',
     "rest_framework_simplejwt.token_blacklist",

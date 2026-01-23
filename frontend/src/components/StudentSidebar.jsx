@@ -53,6 +53,20 @@ export default function StudentSidebar() {
         </NavLink>
 
         <NavLink
+          to="/student/timetable"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+            }`
+          }
+        >
+          <span className="text-xl">🗓️</span>
+          <span>Time Table</span>
+        </NavLink>
+
+        <NavLink
           to="/student/profile"
           className={({ isActive }) =>
             `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${

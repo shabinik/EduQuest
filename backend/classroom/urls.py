@@ -3,7 +3,8 @@ from rest_framework.routers import DefaultRouter
 from . views import (
     CreateClassView,ClassListView,UpdateClassView,DeleteClassView,
     ClassDropdownView,ClassDetailView,TeacherClassView,
-    SubjectViewSet,TimeSlotViewSet,TimeTableViewSet,TimeTableEntryViewSet
+    SubjectViewSet,TimeSlotViewSet,TimeTableViewSet,TimeTableEntryViewSet,
+    StudentTimeTableView,TeacherTimeTableView
 )
 
 
@@ -23,4 +24,6 @@ urlpatterns = [
     path("classes/dropdown/", ClassDropdownView.as_view()),
     path("class/details/<int:class_id>/",ClassDetailView.as_view()),
     path('teacher/class/',TeacherClassView.as_view()),
+    path('students/timetable/',StudentTimeTableView.as_view(), name='student-timetable'),
+    path('teachers/timetable/',TeacherTimeTableView.as_view(), name="teacher-timetable")
 ]

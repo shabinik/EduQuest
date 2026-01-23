@@ -37,6 +37,8 @@ import ClassDetail from './pages/admin/ClassDetail'
 import TeacherClassView from './pages/teacher/TeacherClassView'
 import AdminAnnouncementList from './pages/admin/AdminAnnouncementList'
 import AdminTimeTable from './pages/admin/AdminTimeTable'
+import StudentTimeTable from './pages/student/StudentTimeTable'
+import TeacherTimeTable from './pages/teacher/TeacherTimeTable'
 
 
 
@@ -108,6 +110,7 @@ function App() {
           <Route path='profile' element={<TeacherProfile/>}/>
           <Route path='change-password' element={<TeacherChangePassword />}/>
           <Route path='class' element={<RequireActiveSubscription><TeacherClassView /></RequireActiveSubscription>} />
+          <Route path='timetable' element={<RequireActiveSubscription><TeacherTimeTable /></RequireActiveSubscription>} />
         </Route>
 
         <Route path='/student/login' element={<StudentLogin />} />
@@ -115,6 +118,7 @@ function App() {
           <Route index element={<RequireActiveSubscription><StudentDashboard/></RequireActiveSubscription>} />
           <Route path='profile' element={<StudentProfile />} />
           <Route path='change-password' element={<StudentChangePassword />}/>
+          <Route path='timetable' element={<RequireActiveSubscription><StudentTimeTable /></RequireActiveSubscription>} />
         </Route>
 
         <Route path='/forgot-password' element={<ForgotPassword/>} />
