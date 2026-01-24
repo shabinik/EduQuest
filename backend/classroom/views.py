@@ -400,3 +400,40 @@ class TeacherTimeTableView(APIView):
             "teacher":user.full_name,
             "timetable":timetable
         })
+    
+
+
+class TeacherSubjectDropDownView(APIView):
+    permission_classes = [IsAuthenticated, HasActiveSubscription,IsTeacher]
+
+    def get(self, request):
+        teacher = request.user.teacher_profile
+
+        subjects = Subject.objects.filter(
+            entries__teacher=teacher
+        ).distinct()
+
+        return Response([
+            {"id": s.id, "name": s.name}
+            for s in subjects
+        ])
+
+
+
+class TeacherClassDropDownView(APIView):
+    permission_classes = [IsAuthenticated, HasActiveSubscription]
+
+    def get(self, request):
+        teacher = request.user.teacher_profile
+
+        classes = SchoolClass.objects.filter(
+            timetable__entries__teacher=teacher
+        ).distinct()
+
+        return Response([
+            {
+                "id": c.id,
+                "label": f"{c.name}-{c.division}"
+            }
+            for c in classes
+        ])

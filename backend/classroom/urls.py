@@ -4,7 +4,8 @@ from . views import (
     CreateClassView,ClassListView,UpdateClassView,DeleteClassView,
     ClassDropdownView,ClassDetailView,TeacherClassView,
     SubjectViewSet,TimeSlotViewSet,TimeTableViewSet,TimeTableEntryViewSet,
-    StudentTimeTableView,TeacherTimeTableView
+    StudentTimeTableView,TeacherTimeTableView,
+    TeacherSubjectDropDownView,TeacherClassDropDownView
 )
 
 
@@ -25,5 +26,8 @@ urlpatterns = [
     path("class/details/<int:class_id>/",ClassDetailView.as_view()),
     path('teacher/class/',TeacherClassView.as_view()),
     path('students/timetable/',StudentTimeTableView.as_view(), name='student-timetable'),
-    path('teachers/timetable/',TeacherTimeTableView.as_view(), name="teacher-timetable")
+    path('teachers/timetable/',TeacherTimeTableView.as_view(), name="teacher-timetable"),
+
+    path("teacher/subjects/dropdown/", TeacherSubjectDropDownView.as_view()),
+    path("teacher/classes/dropdown/", TeacherClassDropDownView.as_view()),
 ]
