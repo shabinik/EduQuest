@@ -1,5 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { 
+  GraduationCap, 
+  BookOpen, 
+  Users, 
+  School, 
+  Sparkles, 
+  PenTool, 
+  BookMarked,
+  Backpack,
+  Info,
+  ArrowRight,
+  Shield
+} from 'lucide-react';
 
 export default function LoginLanding() {
   const navigate = useNavigate();
@@ -8,13 +21,13 @@ export default function LoginLanding() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 p-4 relative overflow-hidden">
       {/* School themed background elements */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-10 left-10 text-white text-6xl">📚</div>
-        <div className="absolute top-20 right-20 text-white text-5xl">🎓</div>
-        <div className="absolute bottom-20 left-20 text-white text-5xl">✏️</div>
-        <div className="absolute bottom-10 right-10 text-white text-6xl">📖</div>
-        <div className="absolute top-1/2 left-1/4 text-white text-4xl">🎒</div>
-        <div className="absolute top-1/3 right-1/3 text-white text-5xl">🏫</div>
-        <div className="absolute bottom-1/3 right-1/4 text-white text-4xl">📝</div>
+        <BookOpen className="absolute top-10 left-10 text-white" size={60} />
+        <GraduationCap className="absolute top-20 right-20 text-white" size={50} />
+        <PenTool className="absolute bottom-20 left-20 text-white" size={50} />
+        <BookMarked className="absolute bottom-10 right-10 text-white" size={60} />
+        <Backpack className="absolute top-1/2 left-1/4 text-white" size={40} />
+        <School className="absolute top-1/3 right-1/3 text-white" size={50} />
+        <Users className="absolute bottom-1/3 right-1/4 text-white" size={40} />
       </div>
 
       <div className="max-w-4xl w-full relative z-10">
@@ -40,8 +53,8 @@ export default function LoginLanding() {
                 className="group relative bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-2 border-indigo-200 rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-105 text-left"
               >
                 <div className="flex items-start space-x-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform">
-                    👨‍🎓
+                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                    <Backpack className="text-white" size={28} />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-800 mb-2">Student</h3>
@@ -49,7 +62,7 @@ export default function LoginLanding() {
                   </div>
                 </div>
                 <div className="absolute top-4 right-4 text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                  →
+                  <ArrowRight size={24} />
                 </div>
               </button>
 
@@ -59,8 +72,8 @@ export default function LoginLanding() {
                 className="group relative bg-gradient-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 border-2 border-emerald-200 rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-105 text-left"
               >
                 <div className="flex items-start space-x-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform">
-                    👨‍🏫
+                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                    <Users className="text-white" size={28} />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-800 mb-2">Teacher</h3>
@@ -68,7 +81,7 @@ export default function LoginLanding() {
                   </div>
                 </div>
                 <div className="absolute top-4 right-4 text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                  →
+                  <ArrowRight size={24} />
                 </div>
               </button>
 
@@ -78,8 +91,8 @@ export default function LoginLanding() {
                 className="group relative bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-2 border-purple-200 rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-105 text-left"
               >
                 <div className="flex items-start space-x-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform">
-                    🏫
+                  <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                    <School className="text-white" size={28} />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-800 mb-2">School Admin</h3>
@@ -87,7 +100,7 @@ export default function LoginLanding() {
                   </div>
                 </div>
                 <div className="absolute top-4 right-4 text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                  →
+                  <ArrowRight size={24} />
                 </div>
               </button>
 
@@ -97,8 +110,8 @@ export default function LoginLanding() {
                 className="group relative bg-gradient-to-br from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100 border-2 border-orange-200 rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-105 text-left"
               >
                 <div className="flex items-start space-x-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform">
-                    ⚡
+                  <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                    <Shield className="text-white" size={28} />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-800 mb-2">Super Admin</h3>
@@ -106,7 +119,7 @@ export default function LoginLanding() {
                   </div>
                 </div>
                 <div className="absolute top-4 right-4 text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                  →
+                  <ArrowRight size={24} />
                 </div>
               </button>
             </div>
@@ -114,7 +127,7 @@ export default function LoginLanding() {
             {/* Info Section */}
             <div className="bg-indigo-50 border-l-4 border-indigo-500 rounded-lg p-4">
               <div className="flex items-start space-x-3">
-                <span className="text-2xl">ℹ️</span>
+                <Info className="text-indigo-600 flex-shrink-0" size={24} />
                 <div>
                   <p className="text-gray-700 text-sm">
                     <strong className="text-gray-800">Need help?</strong> If you belong to a school, use the School Admin portal. 

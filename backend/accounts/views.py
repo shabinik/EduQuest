@@ -52,11 +52,11 @@ class LoginView(APIView):
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=False,
+            secure=False,    #True in production
             samesite='Lax',
             domain="localhost",
             path='/',
-            max_age= 60 * 5, #5 min
+            max_age= 60 * 60 * 24 * 30, #30 days
         )
 
         response.set_cookie(
@@ -67,7 +67,7 @@ class LoginView(APIView):
             samesite='Lax',
             domain="localhost",
             path='/',
-            max_age= 60 * 60 * 24 * 7, # 7 days
+            max_age= 60 * 60 * 24 * 60, # 60 days
         )
 
         return response

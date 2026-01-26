@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
+import { 
+  LayoutDashboard, 
+  User, 
+  School, 
+  Calendar, 
+  FileText, 
+  Lock, 
+  LogOut,
+  BookOpen
+} from "lucide-react";
 
 export default function TeacherSidebar() {
   const navigate = useNavigate();
@@ -25,8 +35,8 @@ export default function TeacherSidebar() {
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg flex items-center justify-center text-2xl shadow-md">
-            👩‍🏫
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg flex items-center justify-center shadow-md">
+            <BookOpen className="text-white" size={20} />
           </div>
           <div>
             <h2 className="text-lg font-bold text-gray-800">EduQuest</h2>
@@ -48,7 +58,7 @@ export default function TeacherSidebar() {
             }`
           }
         >
-          <span className="text-xl">📊</span>
+          <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </NavLink>
 
@@ -62,7 +72,7 @@ export default function TeacherSidebar() {
             }`
           }
         >
-          <span className="text-xl">👤</span>
+          <User size={20} />
           <span>My Profile</span>
         </NavLink>
         
@@ -76,7 +86,7 @@ export default function TeacherSidebar() {
             }`
           }
         >
-          <span className="text-xl">🏫</span>
+          <School size={20} />
           <span>My Class</span>
         </NavLink>
 
@@ -90,7 +100,7 @@ export default function TeacherSidebar() {
             }`
           }
         >
-          <span className="text-xl">🗓️</span>
+          <Calendar size={20} />
           <span>Time Table</span>
         </NavLink>
 
@@ -104,7 +114,7 @@ export default function TeacherSidebar() {
             }`
           }
         >
-          <span className="text-xl">🗓️</span>
+          <FileText size={20} />
           <span>Assignments</span>
         </NavLink>
 
@@ -118,7 +128,7 @@ export default function TeacherSidebar() {
             }`
           }
         >
-          <span className="text-xl">🔐</span>
+          <Lock size={20} />
           <span>Change Password</span>
         </NavLink>
       </nav>
@@ -134,7 +144,7 @@ export default function TeacherSidebar() {
               : "bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg"
           }`}
         >
-          <span className="text-lg">{isLoggingOut ? "⏳" : "🚪"}</span>
+          <LogOut size={20} />
           <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
         </button>
       </div>

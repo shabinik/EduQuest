@@ -40,6 +40,7 @@ import AdminTimeTable from './pages/admin/AdminTimeTable'
 import StudentTimeTable from './pages/student/StudentTimeTable'
 import TeacherTimeTable from './pages/teacher/TeacherTimeTable'
 import TeacherAssignmentsPage from './pages/teacher/TeacherAssignmentsPage'
+import StudentAssignmentsPage from './pages/student/StudentAssignmentsPage'
 
 
 
@@ -121,6 +122,7 @@ function App() {
           <Route path='profile' element={<StudentProfile />} />
           <Route path='change-password' element={<StudentChangePassword />}/>
           <Route path='timetable' element={<RequireActiveSubscription><StudentTimeTable /></RequireActiveSubscription>} />
+          <Route path='assignment' element={<RequireActiveSubscription><StudentAssignmentsPage /></RequireActiveSubscription>} />
         </Route>
 
         <Route path='/forgot-password' element={<ForgotPassword/>} />

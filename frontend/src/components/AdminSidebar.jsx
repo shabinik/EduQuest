@@ -1,6 +1,19 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
+import { 
+  LayoutDashboard, 
+  CreditCard, 
+  Users, 
+  GraduationCap, 
+  School, 
+  Megaphone, 
+  Calendar, 
+  Settings, 
+  Lock, 
+  LogOut,
+  BookOpen
+} from "lucide-react";
 
 export default function AdminSidebar() {
   const navigate = useNavigate();
@@ -25,8 +38,8 @@ export default function AdminSidebar() {
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-2xl shadow-md">
-            🏫
+          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center shadow-md">
+            <BookOpen className="text-white" size={20} />
           </div>
           <div>
             <h2 className="text-lg font-bold text-gray-800">EduQuest</h2>
@@ -48,7 +61,7 @@ export default function AdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">📊</span>
+          <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </NavLink>
 
@@ -62,7 +75,7 @@ export default function AdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">💳</span>
+          <CreditCard size={20} />
           <span>Subscription Plans</span>
         </NavLink>
 
@@ -76,7 +89,7 @@ export default function AdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">👩‍🏫</span>
+          <Users size={20} />
           <span>Teachers</span>
         </NavLink>
 
@@ -90,7 +103,7 @@ export default function AdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">👨‍🎓</span>
+          <GraduationCap size={20} />
           <span>Students</span>
         </NavLink>
 
@@ -104,7 +117,7 @@ export default function AdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">🏫</span>
+          <School size={20} />
           <span>Classes</span>
         </NavLink>
 
@@ -118,7 +131,7 @@ export default function AdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">📢</span>
+          <Megaphone size={20} />
           <span>Announcements</span>
         </NavLink>
 
@@ -132,7 +145,7 @@ export default function AdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">🗓️</span>
+          <Calendar size={20} />
           <span>Time Table</span>
         </NavLink>
 
@@ -146,7 +159,7 @@ export default function AdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">⚙️</span>
+          <Settings size={20} />
           <span>Profile</span>
         </NavLink>
 
@@ -160,7 +173,7 @@ export default function AdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">🔐</span>
+          <Lock size={20} />
           <span>Change Password</span>
         </NavLink>
       </nav>
@@ -176,7 +189,7 @@ export default function AdminSidebar() {
               : "bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg"
           }`}
         >
-          <span className="text-lg">{isLoggingOut ? "⏳" : "🚪"}</span>
+          <LogOut size={20} />
           <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
         </button>
       </div>

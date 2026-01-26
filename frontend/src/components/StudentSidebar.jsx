@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
+import { 
+  LayoutDashboard, 
+  Calendar, 
+  FileText, 
+  User, 
+  Lock, 
+  LogOut,
+  Backpack
+} from "lucide-react";
 
 export default function StudentSidebar() {
   const navigate = useNavigate();
@@ -25,8 +34,8 @@ export default function StudentSidebar() {
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center text-2xl shadow-md">
-            🎒
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center shadow-md">
+            <Backpack className="text-white" size={20} />
           </div>
           <div>
             <h2 className="text-lg font-bold text-gray-800">EduQuest</h2>
@@ -48,7 +57,7 @@ export default function StudentSidebar() {
             }`
           }
         >
-          <span className="text-xl">📊</span>
+          <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </NavLink>
 
@@ -62,8 +71,22 @@ export default function StudentSidebar() {
             }`
           }
         >
-          <span className="text-xl">🗓️</span>
+          <Calendar size={20} />
           <span>Time Table</span>
+        </NavLink>
+
+        <NavLink
+          to="/student/assignment"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+            }`
+          }
+        >
+          <FileText size={20} />
+          <span>Assignments</span>
         </NavLink>
 
         <NavLink
@@ -76,7 +99,7 @@ export default function StudentSidebar() {
             }`
           }
         >
-          <span className="text-xl">👤</span>
+          <User size={20} />
           <span>My Profile</span>
         </NavLink>
 
@@ -90,7 +113,7 @@ export default function StudentSidebar() {
             }`
           }
         >
-          <span className="text-xl">🔐</span>
+          <Lock size={20} />
           <span>Change Password</span>
         </NavLink>
       </nav>
@@ -106,7 +129,7 @@ export default function StudentSidebar() {
               : "bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg"
           }`}
         >
-          <span className="text-lg">{isLoggingOut ? "⏳" : "🚪"}</span>
+          <LogOut size={20} />
           <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
         </button>
       </div>

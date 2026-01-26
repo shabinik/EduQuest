@@ -2,7 +2,7 @@ from django.urls import path
 from . views import (
     TeacherAssignmentListCreateView,TeacherAssignmentDetailView,
     StudentAssignmentListView,StudentAssignmentSubmissionCreateView,
-    TeacherSubmissionListView, TeacherSubmissionGradeView
+    TeacherSubmissionListView, TeacherSubmissionGradeView,StudentAssignmentSubmissionUpdateView
 )
 
 urlpatterns = [
@@ -12,5 +12,6 @@ urlpatterns = [
     path("teacher/submissions/<int:pk>/grade/", TeacherSubmissionGradeView.as_view()),
     path("student/assignments/", StudentAssignmentListView.as_view()),
     path("student/submit/", StudentAssignmentSubmissionCreateView.as_view()),
+    path("student/submissions/<int:pk>/", StudentAssignmentSubmissionUpdateView.as_view()),
 ]
 

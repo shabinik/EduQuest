@@ -55,6 +55,8 @@ class AssignmentSubmission(models.Model):
 
     @property
     def is_late(self):
+        if not self.submitted_at:
+            return False
         return self.submitted_at > self.assignment.due_date
     
     @property
@@ -64,8 +66,15 @@ class AssignmentSubmission(models.Model):
         return round((self.marks_obtained / self.assignment.total_marks) * 100, 2)
     
     def save(self, *args, **kwargs):
-        if self.is_late:
-            self.status = "late"
+        is_new = self.pk is None
+
+        if is_new:
+            now = timezone.now()
+            if now > self.assignment.due_date:
+                self.status = "late"
+            else:
+                self.status = "submitted"
+                
         super().save(*args, **kwargs)
 
     def __str__(self):

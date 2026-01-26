@@ -1,13 +1,21 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
+import { 
+  LayoutDashboard, 
+  Building2, 
+  CreditCard, 
+  DollarSign, 
+  LogOut,
+  GraduationCap
+} from "lucide-react";
 
 function SuperAdminSidebar() {
   const navigate = useNavigate();
-  const [isLoggingOut,setIsLoggingOut] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const logout = async () => {
-    setIsLoggingOut(true)
+    setIsLoggingOut(true);
     try {
       await axiosInstance.post("accounts/logout/");
       sessionStorage.clear();
@@ -16,17 +24,17 @@ function SuperAdminSidebar() {
       console.error(err);
       navigate("/");
     } finally {
-      setIsLoggingOut(false)
+      setIsLoggingOut(false);
     }
   };
 
   return (
-     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg h-screen overflow-y-auto">
+    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg h-screen overflow-y-auto">
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-2xl shadow-md">
-            🎓
+          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center shadow-md">
+            <GraduationCap className="text-white" size={20} />
           </div>
           <div>
             <h2 className="text-lg font-bold text-gray-800">EduQuest</h2>
@@ -48,7 +56,7 @@ function SuperAdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">📊</span>
+          <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </NavLink>
 
@@ -62,7 +70,7 @@ function SuperAdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">🏫</span>
+          <Building2 size={20} />
           <span>Schools</span>
         </NavLink>
 
@@ -76,7 +84,7 @@ function SuperAdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">💳</span>
+          <CreditCard size={20} />
           <span>Subscription Plans</span>
         </NavLink>
 
@@ -90,7 +98,7 @@ function SuperAdminSidebar() {
             }`
           }
         >
-          <span className="text-xl">💰</span>
+          <DollarSign size={20} />
           <span>Billing</span>
         </NavLink>
       </nav>
@@ -106,7 +114,7 @@ function SuperAdminSidebar() {
               : "bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg"
           }`}
         >
-          <span className="text-lg">{isLoggingOut ? "⏳" : "🚪"}</span>
+          <LogOut size={20} />
           <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
         </button>
       </div>
