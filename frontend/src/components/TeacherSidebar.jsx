@@ -61,20 +61,6 @@ export default function TeacherSidebar() {
           <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </NavLink>
-
-        <NavLink
-          to="/teacher/profile"
-          className={({ isActive }) =>
-            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-              isActive
-                ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-md font-semibold"
-                : "text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
-            }`
-          }
-        >
-          <User size={20} />
-          <span>My Profile</span>
-        </NavLink>
         
         <NavLink
           to="/teacher/class"
@@ -105,6 +91,20 @@ export default function TeacherSidebar() {
         </NavLink>
 
         <NavLink
+          to="/teacher/attendance"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
+            }`
+          }
+        >
+          <FileText size={20} />
+          <span>Students Attendance</span>
+        </NavLink>
+
+        <NavLink
           to="/teacher/assignment"
           className={({ isActive }) =>
             `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -116,6 +116,20 @@ export default function TeacherSidebar() {
         >
           <FileText size={20} />
           <span>Assignments</span>
+        </NavLink>
+
+        <NavLink
+          to="/teacher/profile"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
+            }`
+          }
+        >
+          <User size={20} />
+          <span>My Profile</span>
         </NavLink>
 
         <NavLink

@@ -41,6 +41,8 @@ import StudentTimeTable from './pages/student/StudentTimeTable'
 import TeacherTimeTable from './pages/teacher/TeacherTimeTable'
 import TeacherAssignmentsPage from './pages/teacher/TeacherAssignmentsPage'
 import StudentAssignmentsPage from './pages/student/StudentAssignmentsPage'
+import TeacherAttendance from './pages/teacher/TeacherAttendance'
+import StudentAttendance from './pages/student/StudentsAttendance'
 
 
 
@@ -114,6 +116,7 @@ function App() {
           <Route path='class' element={<RequireActiveSubscription><TeacherClassView /></RequireActiveSubscription>} />
           <Route path='timetable' element={<RequireActiveSubscription><TeacherTimeTable /></RequireActiveSubscription>} />
           <Route path='assignment' element={<RequireActiveSubscription><TeacherAssignmentsPage /></RequireActiveSubscription>} />
+          <Route path='attendance' element={<RequireActiveSubscription><TeacherAttendance /></RequireActiveSubscription>} />
         </Route>
 
         <Route path='/student/login' element={<StudentLogin />} />
@@ -123,6 +126,7 @@ function App() {
           <Route path='change-password' element={<StudentChangePassword />}/>
           <Route path='timetable' element={<RequireActiveSubscription><StudentTimeTable /></RequireActiveSubscription>} />
           <Route path='assignment' element={<RequireActiveSubscription><StudentAssignmentsPage /></RequireActiveSubscription>} />
+          <Route path='attendance' element={<RequireActiveSubscription><StudentAttendance /></RequireActiveSubscription>} />
         </Route>
 
         <Route path='/forgot-password' element={<ForgotPassword/>} />

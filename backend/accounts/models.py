@@ -26,6 +26,7 @@ class Tenant(models.Model):
     
 
 
+
 class User(AbstractUser):
     full_name = models.CharField(max_length=225,blank=True,null=True)
     tenant = models.ForeignKey(Tenant,on_delete=models.SET_NULL,null=True,blank=True)
@@ -50,6 +51,8 @@ class User(AbstractUser):
         if self.role == 'superadmin':
             self.tenant = None
         super().save(*args,**kwargs)
+
+
 
 
 class EmailOtp(models.Model):
