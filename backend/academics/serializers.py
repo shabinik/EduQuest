@@ -115,7 +115,7 @@ class AttendanceMarkSerializer(serializers.Serializer):
                     "Status must be 'present', 'absent', or 'leave'"
                 )
             
-            return value
+        return value
         
     
 class MonthlyAttendanceSummarySerializer(serializers.ModelSerializer):

@@ -1,16 +1,14 @@
-// Teacher Viewing Students and marking Attendance
-
 import { useEffect, useState } from "react"
-import { Calendar, Users, CheckCircle, XCircle, Clock, ArrowLeft, Save } from "lucide-react"
+import { Calendar, Users, CheckCircle, XCircle, Clock, ArrowLeft, Save, Eye, Edit2 } from "lucide-react"
 import toast from "react-hot-toast"
 import axiosInstance from "../../api/axiosInstance"
-
 
 export default function TeacherAttendance() {
   const [view, setView] = useState("list")
   const [attendanceRecords, setAttendanceRecords] = useState([])
   const [loading, setLoading] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [selectedRecord, setSelectedRecord] = useState(null)
 
   useEffect(() => {
     fetchAttendanceRecords()
@@ -31,19 +29,41 @@ export default function TeacherAttendance() {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto">
-        {view === "list" ? (
+        {view === "list" && (
           <AttendanceList 
             records={attendanceRecords}
             loading={loading}
-            onMarkAttendance={() => setView("mark")}
+            onMarkAttendance={() => {
+              setSelectedRecord(null)
+              setView("mark")
+            }}
+            onViewRecord={(record) => {
+              setSelectedRecord(record)
+              setView("view")
+            }}
           />
-        ) : (
+        )}
+
+        {view === "view" && (
+          <ViewAttendance
+            record={selectedRecord}
+            onBack={() => setView("list")}
+            onEdit={() => {
+              setSelectedDate(selectedRecord.date)
+              setView("mark")
+            }}
+          />
+        )}
+
+        {view === "mark" && (
           <MarkAttendance
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
+            editingRecord={selectedRecord}
             onBack={() => setView("list")}
             onSuccess={() => {
               setView("list")
+              setSelectedRecord(null)
               fetchAttendanceRecords()
             }}
           />
@@ -53,9 +73,8 @@ export default function TeacherAttendance() {
   )
 }
 
-//  Attendance List of students
-
-function AttendanceList({ records, loading, onMarkAttendance }) {
+// Attendance List
+function AttendanceList({ records, loading, onMarkAttendance, onViewRecord }) {
   return (
     <div>
       {/* Header */}
@@ -98,7 +117,7 @@ function AttendanceList({ records, loading, onMarkAttendance }) {
                   <th className="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase">Present</th>
                   <th className="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase">Absent</th>
                   <th className="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase">Attendance %</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Marked By</th>
+                  <th className="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -145,8 +164,14 @@ function AttendanceList({ records, loading, onMarkAttendance }) {
                           <span className="text-sm font-semibold text-gray-700">{percentage}%</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-600 text-sm">
-                        {record.marked_by_name}
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => onViewRecord(record)}
+                          className="text-indigo-600 hover:text-indigo-800 font-semibold inline-flex items-center gap-1"
+                        >
+                          <Eye size={16} />
+                          View
+                        </button>
                       </td>
                     </tr>
                   )
@@ -160,14 +185,126 @@ function AttendanceList({ records, loading, onMarkAttendance }) {
   )
 }
 
+// View Attendance Detail
+function ViewAttendance({ record, onBack, onEdit }) {
+  const percentage = ((record.present_count / record.total_students) * 100).toFixed(1)
 
-// Marking students attendance by Teacher
+  return (
+    <div>
+      {/* Header */}
+      <div className="mb-6">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-800 font-semibold mb-4 transition"
+        >
+          <ArrowLeft size={20} />
+          Back to Records
+        </button>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Attendance Details</h1>
+            <p className="text-gray-600 mt-1">
+              {record.class_name} - {record.division} • {new Date(record.date).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </p>
+          </div>
+          <button
+            onClick={onEdit}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition"
+          >
+            <Edit2 size={18} />
+            Edit Attendance
+          </button>
+        </div>
+      </div>
 
-function MarkAttendance({ selectedDate, setSelectedDate, onBack, onSuccess }) {
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <StatCard label="Total Students" value={record.total_students} color="blue" />
+        <StatCard label="Present" value={record.present_count} color="green" />
+        <StatCard label="Absent" value={record.absent_count} color="red" />
+        <StatCard label="Attendance %" value={`${percentage}%`} color="purple" />
+      </div>
+
+      {/* Attendance Progress */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-bold text-gray-800">Overall Attendance</h3>
+          <span className="text-2xl font-black text-gray-900">{percentage}%</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-4">
+          <div
+            className={`h-4 rounded-full transition-all ${
+              percentage >= 75
+                ? 'bg-gradient-to-r from-green-500 to-green-600'
+                : percentage >= 50
+                ? 'bg-gradient-to-r from-yellow-500 to-yellow-600'
+                : 'bg-gradient-to-r from-red-500 to-red-600'
+            }`}
+            style={{ width: `${percentage}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Student List */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-bold text-gray-800">Student Attendance List</h2>
+        </div>
+        <div className="divide-y divide-gray-200">
+          {record.student_attendances && record.student_attendances.map((attendance, index) => (
+            <div key={index} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <span className="text-indigo-700 font-bold">
+                    {attendance.student_name.charAt(0)}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800">{attendance.student_name}</p>
+                  <p className="text-sm text-gray-500">Roll: {attendance.student_roll}</p>
+                </div>
+              </div>
+              <div>
+                {attendance.status === 'present' && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">
+                    <CheckCircle size={16} />
+                    Present
+                  </span>
+                )}
+                {attendance.status === 'absent' && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-700">
+                    <XCircle size={16} />
+                    Absent
+                  </span>
+                )}
+                {attendance.status === 'leave' && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700">
+                    <Clock size={16} />
+                    On Leave
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Mark/Edit Attendance
+function MarkAttendance({ selectedDate, setSelectedDate, editingRecord, onBack, onSuccess }) {
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const classId = 1 // This should come from teacher's assigned class
+
+  const isEditing = !!editingRecord
 
   useEffect(() => {
     fetchStudents()
@@ -204,12 +341,6 @@ function MarkAttendance({ selectedDate, setSelectedDate, onBack, onSuccess }) {
     setStudents(students.map(s => ({ ...s, status })))
   }
 
-  const formatDateToISO = (date) => {
-    const d = new Date(date)
-    return d.toISOString().split("T")[0]
-  }
-
-
   const handleSubmit = async () => {
     setSaving(true)
     try {
@@ -224,7 +355,7 @@ function MarkAttendance({ selectedDate, setSelectedDate, onBack, onSuccess }) {
         attendance_data: attendanceData
       })
 
-      toast.success("Attendance marked successfully!")
+      toast.success(isEditing ? "Attendance updated successfully!" : "Attendance marked successfully!")
       onSuccess()
     } catch (err) {
       toast.error(err.response?.data?.error || "Failed to mark attendance")
@@ -251,8 +382,12 @@ function MarkAttendance({ selectedDate, setSelectedDate, onBack, onSuccess }) {
           <ArrowLeft size={20} />
           Back to Records
         </button>
-        <h1 className="text-3xl font-bold text-gray-900">Mark Attendance</h1>
-        <p className="text-gray-600 mt-1">Select attendance status for each student</p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          {isEditing ? 'Edit Attendance' : 'Mark Attendance'}
+        </h1>
+        <p className="text-gray-600 mt-1">
+          {isEditing ? 'Update attendance status for each student' : 'Select attendance status for each student'}
+        </p>
       </div>
 
       {/* Date and Quick Actions */}
@@ -263,9 +398,12 @@ function MarkAttendance({ selectedDate, setSelectedDate, onBack, onSuccess }) {
             <input
               type="date"
               value={selectedDate}
-              onChange={(e) => setSelectedDate(formatDateToISO(e.target.value))}
+              onChange={(e) => setSelectedDate(e.target.value)}
               max={new Date().toISOString().split('T')[0]}
-              className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none"
+              disabled={isEditing}
+              className={`w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none ${
+                isEditing ? 'bg-gray-100 cursor-not-allowed' : ''
+              }`}
             />
           </div>
           <div>
@@ -372,18 +510,20 @@ function MarkAttendance({ selectedDate, setSelectedDate, onBack, onSuccess }) {
         className={`w-full py-4 rounded-lg font-bold text-lg flex items-center justify-center gap-2 transition ${
           saving
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : isEditing
+            ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg'
             : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg'
         }`}
       >
         {saving ? (
           <>
             <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-            Saving...
+            {isEditing ? 'Updating...' : 'Saving...'}
           </>
         ) : (
           <>
             <Save size={20} />
-            Save Attendance
+            {isEditing ? 'Update Attendance' : 'Save Attendance'}
           </>
         )}
       </button>
@@ -396,7 +536,8 @@ function StatCard({ label, value, color }) {
     blue: 'from-blue-500 to-blue-600',
     green: 'from-green-500 to-green-600',
     red: 'from-red-500 to-red-600',
-    yellow: 'from-yellow-500 to-yellow-600'
+    yellow: 'from-yellow-500 to-yellow-600',
+    purple: 'from-purple-500 to-purple-600'
   }
 
   return (

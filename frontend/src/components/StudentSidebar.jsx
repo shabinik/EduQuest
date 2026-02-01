@@ -8,7 +8,8 @@ import {
   User, 
   Lock, 
   LogOut,
-  Backpack
+  Backpack,
+  ClipboardCheck
 } from "lucide-react";
 
 export default function StudentSidebar() {
@@ -85,7 +86,7 @@ export default function StudentSidebar() {
             }`
           }
         >
-          <FileText size={20} />
+          <ClipboardCheck size={20} />
           <span>My Attendance</span>
         </NavLink>
 

@@ -155,7 +155,7 @@ class TeacherMarkAttendanceView(generics.GenericAPIView):
 
                 # Clear existing student attendance if updating
                 if not created:
-                    class_attendance.student_attendance.all().delete()
+                    class_attendance.student_attendances.all().delete()
                     class_attendance.marked_by = teacher
                     class_attendance.is_completed = True
                     class_attendance.marked_at = timezone.now()
@@ -286,6 +286,19 @@ class TeacherGetClassStudentsView(generics.GenericAPIView):
     
 
 
+class TeacherAttendanceDetailView(generics.RetrieveAPIView):
+    """View detailed attendance record"""
+    serializer_class = ClassDailyAttendanceSerializer
+    permission_classes = [IsAuthenticated, IsTeacher, HasActiveSubscription]
+    
+    def get_queryset(self):
+        return ClassDailyAttendance.objects.filter(
+            tenant=self.request.user.tenant,
+            school_class__class_teacher=self.request.user.teacher_profile
+        ).select_related('school_class', 'marked_by__user').prefetch_related('student_attendances__student__user')
+    
+
+
 class StudentAttendanceView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated,HasActiveSubscription]
 
@@ -335,8 +348,6 @@ class StudentMonthlyReportView(generics.ListAPIView):
         return MonthlyAttendanceSummary.objects.filter(
             student = self.request.user.student_profile
         ).order_by('-year', '-month')
-
-
 
 
 

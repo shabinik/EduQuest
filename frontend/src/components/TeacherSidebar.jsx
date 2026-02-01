@@ -9,7 +9,8 @@ import {
   FileText, 
   Lock, 
   LogOut,
-  BookOpen
+  BookOpen,
+  ClipboardCheck
 } from "lucide-react";
 
 export default function TeacherSidebar() {
@@ -100,7 +101,7 @@ export default function TeacherSidebar() {
             }`
           }
         >
-          <FileText size={20} />
+          <ClipboardCheck size={20} />
           <span>Students Attendance</span>
         </NavLink>
 
