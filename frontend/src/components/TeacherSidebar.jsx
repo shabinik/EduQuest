@@ -120,6 +120,20 @@ export default function TeacherSidebar() {
         </NavLink>
 
         <NavLink
+          to="/teacher/exam"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
+            }`
+          }
+        >
+          <FileText size={20} />
+          <span>Exams</span>
+        </NavLink>
+
+        <NavLink
           to="/teacher/profile"
           className={({ isActive }) =>
             `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
