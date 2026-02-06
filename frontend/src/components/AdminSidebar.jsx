@@ -12,7 +12,8 @@ import {
   Settings, 
   Lock, 
   LogOut,
-  BookOpen
+  BookOpen,
+  Wallet
 } from "lucide-react";
 
 export default function AdminSidebar() {
@@ -147,6 +148,20 @@ export default function AdminSidebar() {
         >
           <Calendar size={20} />
           <span>Time Table</span>
+        </NavLink>
+
+        <NavLink
+          to="/admin/fee-management"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-gray-100 hover:text-indigo-600"
+            }`
+          }
+        >
+          <Wallet size={20} />
+          <span>Fee Management</span>
         </NavLink>
 
         <NavLink

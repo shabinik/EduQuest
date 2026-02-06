@@ -45,6 +45,8 @@ import TeacherAttendance from './pages/teacher/TeacherAttendance'
 import StudentAttendance from './pages/student/StudentsAttendance'
 import TeacherExamManagement from './pages/teacher/TeacherExamManagement'
 import StudentExamPage from './pages/student/StudentExamPage'
+import AdminFeeManagement from './pages/admin/AdminFeeManagement'
+import StudentFeeManagement from './pages/student/StudentFeeManagement'
 
 
 function App() {
@@ -107,6 +109,7 @@ function App() {
           <Route path='announcements' element={<RequireActiveSubscription><AdminAnnouncementList/></RequireActiveSubscription>} />
           <Route path='classes/:id' element={<RequireActiveSubscription><ClassDetail/></RequireActiveSubscription>} />
           <Route path='timetable' element={<RequireActiveSubscription><AdminTimeTable/></RequireActiveSubscription>} />
+          <Route path='fee-management' element={<RequireActiveSubscription><AdminFeeManagement/></RequireActiveSubscription>} />
         </Route>
         
         <Route path="/teacher/login" element={<TeacherLogin />} />
@@ -130,6 +133,7 @@ function App() {
           <Route path='assignment' element={<RequireActiveSubscription><StudentAssignmentsPage /></RequireActiveSubscription>} />
           <Route path='attendance' element={<RequireActiveSubscription><StudentAttendance /></RequireActiveSubscription>} />
           <Route path='exam' element={<RequireActiveSubscription><StudentExamPage /></RequireActiveSubscription>} />
+          <Route path='fee-management' element={<RequireActiveSubscription><StudentFeeManagement /></RequireActiveSubscription>} />
         </Route>
 
         <Route path='/forgot-password' element={<ForgotPassword/>} />

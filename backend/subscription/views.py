@@ -3,13 +3,13 @@ from accounts.permissions import IsSuperAdmin,IsAdmin
 from rest_framework.permissions import IsAuthenticated
 from . models import SubscriptionPlan,Subscription,Payment
 from . serializers import SubscriptionPlanSerializer,SubscriptionSerializer,PaymentSerializer
-import razorpay
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from . razorpay_client import get_razorpay_client
 
 
 
@@ -64,9 +64,7 @@ class CreateOrderView(APIView):
         plan = get_object_or_404(SubscriptionPlan,id = plan_id,is_active = True)
 
         # Razorpay Client
-        client = razorpay.Client(
-            auth = (settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
-        )
+        client = get_razorpay_client()
 
         amount_paise = int(plan.price * 100)
         
@@ -118,9 +116,7 @@ class VerifyPaymentView(APIView):
         data = request.data
         payment = get_object_or_404(Payment, id = data.get("payment_id"))
 
-        client = razorpay.Client(
-            auth = (settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
-        )
+        client = get_razorpay_client()
 
         params = {
             "razorpay_order_id":data.get("razorpay_order_id"),

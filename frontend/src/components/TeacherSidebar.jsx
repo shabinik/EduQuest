@@ -10,7 +10,8 @@ import {
   Lock, 
   LogOut,
   BookOpen,
-  ClipboardCheck
+  ClipboardCheck,
+  GraduationCap 
 } from "lucide-react";
 
 export default function TeacherSidebar() {
@@ -129,7 +130,7 @@ export default function TeacherSidebar() {
             }`
           }
         >
-          <FileText size={20} />
+          <GraduationCap  size={20} />
           <span>Exams</span>
         </NavLink>
 

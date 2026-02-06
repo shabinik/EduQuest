@@ -9,7 +9,9 @@ import {
   Lock, 
   LogOut,
   Backpack,
-  ClipboardCheck
+  ClipboardCheck,
+  GraduationCap,
+  CreditCard 
 } from "lucide-react";
 
 export default function StudentSidebar() {
@@ -114,8 +116,22 @@ export default function StudentSidebar() {
             }`
           }
         >
-          <FileText size={20} />
+          <GraduationCap  size={20} />
           <span>Exams</span>
+        </NavLink>
+
+        <NavLink
+          to="/student/fee-management"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+            }`
+          }
+        >
+          <CreditCard  size={20} />
+          <span>Fee Management</span>
         </NavLink>
 
         <NavLink
