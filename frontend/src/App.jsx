@@ -47,6 +47,7 @@ import TeacherExamManagement from './pages/teacher/TeacherExamManagement'
 import StudentExamPage from './pages/student/StudentExamPage'
 import AdminFeeManagement from './pages/admin/AdminFeeManagement'
 import StudentFeeManagement from './pages/student/StudentFeeManagement'
+import SchoolExpenseManagement from './pages/admin/SchoolExpenseManagement'
 
 
 function App() {
@@ -110,6 +111,7 @@ function App() {
           <Route path='classes/:id' element={<RequireActiveSubscription><ClassDetail/></RequireActiveSubscription>} />
           <Route path='timetable' element={<RequireActiveSubscription><AdminTimeTable/></RequireActiveSubscription>} />
           <Route path='fee-management' element={<RequireActiveSubscription><AdminFeeManagement/></RequireActiveSubscription>} />
+          <Route path='expenses' element={<RequireActiveSubscription><SchoolExpenseManagement/></RequireActiveSubscription>} />
         </Route>
         
         <Route path="/teacher/login" element={<TeacherLogin />} />

@@ -2,11 +2,13 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from decimal import Decimal
+from django.db.models import Sum
 
 User = settings.AUTH_USER_MODEL
 
 # Create your models here.
 
+# Student Fees
 
 class FeeType(models.Model):
     """What is being charged (Sports, Library, Tuition, etc.)"""
@@ -191,3 +193,127 @@ class Payment(models.Model):
         
         # Update bill status
         self.bill.update_status()
+
+
+
+# Schools Expense
+
+class ExpenseCategory(models.Model):
+    """Categories for expenses like Salary, Utilities, Maintenance, etc."""
+    tenant = models.ForeignKey("accounts.Tenant", on_delete=models.CASCADE, related_name="expense_categories")
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("tenant", "name")
+        ordering = ['name']
+        verbose_name_plural = "Expense Categories"
+
+    def __str__(self):
+        return self.name
+
+
+class Expense(models.Model):
+    """Individual expense records"""
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Cash'),
+        ('upi', 'UPI'),
+        ('card', 'Card'),
+        ('bank_transfer', 'Bank Transfer'),
+        ('cheque', 'Cheque'),
+    ]
+
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    tenant = models.ForeignKey("accounts.Tenant", on_delete=models.CASCADE, related_name="expenses")
+    category = models.ForeignKey(ExpenseCategory, on_delete=models.PROTECT, related_name="expenses")
+    title = models.CharField(max_length=200, help_text="Brief title of the expense")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    expense_date = models.DateField(default=timezone.now, help_text="Date when expense occurred")
+    payment_date = models.DateField(null=True, blank=True, help_text="Date when payment was made")
+    
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='cash')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    
+    # Approval workflow - vendor is the approving admin
+    is_approved = models.BooleanField(default=True, help_text="If expense is approved")
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="approved_expenses", help_text="Admin who approved (vendor)")
+    
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="created_expenses")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-expense_date', '-created_at']
+        indexes = [
+            models.Index(fields=['tenant', 'expense_date']),
+            models.Index(fields=['tenant', 'category']),
+            models.Index(fields=['tenant', 'payment_status']),
+        ]
+
+    def __str__(self):
+        return f"{self.title} - ₹{self.amount} ({self.expense_date})"
+
+    @property
+    def month_year(self):
+        """Return formatted month-year string"""
+        return self.expense_date.strftime('%B %Y')
+
+    @classmethod
+    def get_monthly_total(cls, tenant, year, month):
+        """Get total expenses for a specific month"""
+        return cls.objects.filter(
+            tenant=tenant,
+            expense_date__year=year,
+            expense_date__month=month,
+            payment_status='paid'
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+
+    @classmethod
+    def get_yearly_total(cls, tenant, year):
+        """Get total expenses for a specific year"""
+        return cls.objects.filter(
+            tenant=tenant,
+            expense_date__year=year,
+            payment_status='paid'
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+
+    @classmethod
+    def get_category_totals(cls, tenant, year=None, month=None):
+        """Get expense totals grouped by category"""
+        queryset = cls.objects.filter(tenant=tenant, payment_status='paid')
+        
+        if year:
+            queryset = queryset.filter(expense_date__year=year)
+        if month:
+            queryset = queryset.filter(expense_date__month=month)
+        
+        return queryset.values('category__name').annotate(
+            total=Sum('amount')
+        ).order_by('-total')
+
+    @classmethod
+    def get_monthly_breakdown(cls, tenant, year):
+        """Get month-by-month breakdown for a year"""
+        from django.db.models.functions import TruncMonth
+        
+        return cls.objects.filter(
+            tenant=tenant,
+            expense_date__year=year,
+            payment_status='paid'
+        ).annotate(
+            month=TruncMonth('expense_date')
+        ).values('month').annotate(
+            total=Sum('amount')
+        ).order_by('month')
+    

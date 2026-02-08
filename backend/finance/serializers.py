@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from . models import FeeType,FeeStructure,StudentBill,Payment
-
+from . models import FeeType,FeeStructure,StudentBill,Payment,ExpenseCategory, Expense
+from django.db.models import Sum
+from decimal import Decimal
 
 class FeeTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -134,3 +135,120 @@ class StudentBillDetailSerializer(serializers.ModelSerializer):
     
     def get_is_paid(self, obj):
         return obj.status == 'paid'
+    
+
+
+
+# SCHOOL EXPENSE 
+
+class ExpenseCategorySerializer(serializers.ModelSerializer):
+    expense_count = serializers.SerializerMethodField()
+    total_amount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ExpenseCategory
+        fields = ['id', 'name', 'description', 'is_active', 'expense_count', 'total_amount', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+    def get_expense_count(self, obj):
+        """Get count of expenses in this category"""
+        return obj.expenses.filter(payment_status='paid').count()
+
+    def get_total_amount(self, obj):
+        """Get total amount spent in this category"""
+        total = obj.expenses.filter(payment_status='paid').aggregate(
+            total=Sum('amount')
+        )['total']
+        return float(total) if total else 0.0
+
+
+class ExpenseListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for list views"""
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
+    month_year = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Expense
+        fields = [
+            'id', 'category', 'category_name', 'title', 'amount', 
+            'expense_date', 'payment_date', 'payment_method', 'payment_status',
+            'month_year', 'created_by_name', 'created_at'
+        ]
+
+
+class ExpenseDetailSerializer(serializers.ModelSerializer):
+    """Detailed serializer with all fields and relationships"""
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
+    approved_by_name = serializers.CharField(source='approved_by.get_full_name', read_only=True)
+    month_year = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Expense
+        fields = [
+            'id', 'category', 'category_name', 'title',
+            'amount', 'expense_date', 'payment_date', 'payment_method',
+            'payment_status', 'is_approved', 'approved_by', 'approved_by_name',
+            'created_by', 'created_by_name', 'notes', 'month_year',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
+
+
+class ExpenseCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for creating and updating expenses"""
+
+    class Meta:
+        model = Expense
+        fields = [
+            'category', 'title', 'amount',
+            'expense_date', 'payment_date', 'payment_method',
+            'payment_status', 'is_approved', 'approved_by', 'notes'
+        ]
+
+    def validate_amount(self, value):
+        """Ensure amount is positive"""
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be greater than zero.")
+        return value
+
+    def validate(self, data):
+        """Custom validation"""
+        # If payment status is paid, payment_date should be set
+        if data.get('payment_status') == 'paid' and not data.get('payment_date'):
+            data['payment_date'] = data.get('expense_date')
+        
+        return data
+
+    def create(self, validated_data):
+        """Set created_by to current user"""
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class ExpenseSummarySerializer(serializers.Serializer):
+    """Serializer for expense summary statistics"""
+    total_expenses = serializers.DecimalField(max_digits=12, decimal_places=2)
+    total_paid = serializers.DecimalField(max_digits=12, decimal_places=2)
+    total_pending = serializers.DecimalField(max_digits=12, decimal_places=2)
+    expense_count = serializers.IntegerField()
+    paid_count = serializers.IntegerField()
+    pending_count = serializers.IntegerField()
+    monthly_total = serializers.DecimalField(max_digits=12, decimal_places=2)
+    yearly_total = serializers.DecimalField(max_digits=12, decimal_places=2)
+    category_breakdown = serializers.ListField()
+
+
+class MonthlyBreakdownSerializer(serializers.Serializer):
+    """Serializer for monthly expense breakdown"""
+    month = serializers.DateField()
+    total = serializers.DecimalField(max_digits=12, decimal_places=2)
+    month_name = serializers.CharField()
+
+
+class CategoryBreakdownSerializer(serializers.Serializer):
+    """Serializer for category-wise breakdown"""
+    category__name = serializers.CharField()
+    total = serializers.DecimalField(max_digits=12, decimal_places=2)
+    percentage = serializers.FloatField()
