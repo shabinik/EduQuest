@@ -127,5 +127,3 @@ class MonthlyAttendanceSummary(models.Model):
 
     def __str__(self):
         return f"{self.student} - {self.month}/{self.year}"
-
-    

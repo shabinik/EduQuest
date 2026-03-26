@@ -113,7 +113,7 @@ class AdminSignupSerializer(serializers.Serializer):
         user.save()
         
         #SEND OTP VIA EMAIL
-        subject="EduQuest Admin Email Verification",
+        subject="EduQuest Admin Email Verification"
         message_template=(
             "Hello {name},\n\n"
             "We received a request to verify your email for EduQuest.\n\n"
@@ -123,7 +123,7 @@ class AdminSignupSerializer(serializers.Serializer):
             "If you did not request this, please ignore this email.\n\n"
             "Regards,\n"
             "EduQuest Team"
-        ),
+        )
         send_otp(user,subject,message_template)
 
         return user
@@ -146,7 +146,7 @@ class AdminResendOtpSerializer(serializers.Serializer):
     
     def save(self):
         user = self.user       
-        subject="EduQuest | Verify Your Email",
+        subject="EduQuest | Verify Your Email"
         message_template =(
             "Hello {name},\n\n"
             "We received a request to verify your email for EduQuest.\n\n"
@@ -156,7 +156,7 @@ class AdminResendOtpSerializer(serializers.Serializer):
             "If you did not request this, please ignore this email.\n\n"
             "Regards,\n"
             "EduQuest Team"
-        ),
+        )
         send_otp(user,subject,message_template)
 
 

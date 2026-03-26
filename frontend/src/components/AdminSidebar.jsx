@@ -180,6 +180,20 @@ export default function AdminSidebar() {
         </NavLink>
 
         <NavLink
+          to="/admin/meetings"
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md font-semibold"
+                : "text-gray-700 hover:bg-gray-100 hover:text-indigo-600"
+            }`
+          }
+        >
+          <Receipt  size={20} />
+          <span>Staff Meetings</span>
+        </NavLink>
+
+        <NavLink
           to="/admin/profile"
           className={({ isActive }) =>
             `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${

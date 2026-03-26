@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'assignment',
     'exam',
     'finance',
+    'chatvideo',
     'cloudinary',
     'cloudinary_storage',
     "rest_framework_simplejwt.token_blacklist",
@@ -206,3 +207,6 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

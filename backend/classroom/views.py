@@ -11,6 +11,7 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404 
 
 # Create your views here.
+# Class Time Table
 
 class CreateClassView(APIView):
     permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]

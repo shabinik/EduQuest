@@ -9,7 +9,17 @@ function BuyPlan() {
     const [error, setError] = useState("")
     const [processingPlan,setProcessingPlan] = useState(null)
 
+    const user = JSON.parse(sessionStorage.getItem("user") || "{}")
+    const hasActiveSub = user?.has_active_subscription === true
+    const expiryDate = user?.expiry_date
+        ? new Date(user.expiry_date).toLocaleDateString("en-IN", {
+            day: "numeric", month: "long", year: "numeric"
+          })
+        : null
+
     useEffect(() => {
+      if (hasActiveSub) return  // skip fetching plans if already subscribed
+
       setLoading(true)
       setError('')
       axiosInstance.get("subscriptions/active-plans")
@@ -79,6 +89,7 @@ function BuyPlan() {
             setProcessingPlan(null)
         })
     }
+
   // Helper to get plan color scheme
     const getPlanStyle = (index) => {
         const styles = [
@@ -99,6 +110,63 @@ function BuyPlan() {
             }
         ]
         return styles[index % 3]
+    }
+
+    // --- Active Subscription Banner ---
+    if (hasActiveSub) {
+        return (
+            <div className="p-8 max-w-7xl mx-auto">
+                <div className="text-center mb-12">
+                    <div className="inline-block mb-4">
+                        <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-4xl shadow-lg">
+                            💎
+                        </div>
+                    </div>
+                    <h1 className="text-4xl font-bold text-gray-800 mb-3">
+                        Choose Your Perfect Plan
+                    </h1>
+                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                        Select the subscription plan that best fits your institution's needs and unlock powerful features
+                    </p>
+                </div>
+
+                <div className="max-w-lg mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-green-100">
+                    {/* Green top bar */}
+                    <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-8 text-white text-center relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12"></div>
+                        <div className="text-5xl mb-3 relative z-10">✅</div>
+                        <h2 className="text-2xl font-bold relative z-10">You're All Set!</h2>
+                        <p className="text-white text-opacity-90 text-sm mt-1 relative z-10">
+                            Your subscription is currently active
+                        </p>
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-8 text-center">
+                        <p className="text-gray-600 text-base leading-relaxed mb-6">
+                            You already have an active subscription plan. You can explore new plans once your current plan expires.
+                        </p>
+
+                        {expiryDate && (
+                            <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-5 py-3 rounded-xl font-medium text-sm mb-6">
+                                <span>📅</span>
+                                <span>Expires on <strong>{expiryDate}</strong></span>
+                            </div>
+                        )}
+
+                        <div className="border-t border-gray-100 pt-6">
+                            <a
+                                href="/admin"
+                                className="inline-block bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+                            >
+                                🏠 Go to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     return (

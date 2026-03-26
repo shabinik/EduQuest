@@ -16,6 +16,7 @@ from django.shortcuts import get_object_or_404
 from classroom.models import SchoolClass
 
 # Create your views here.
+# Announcement and Attendance
 
 class CreateAnnouncement(APIView):
     permission_classes = [IsAuthenticated,IsAdmin,HasActiveSubscription]
@@ -348,8 +349,3 @@ class StudentMonthlyReportView(generics.ListAPIView):
         return MonthlyAttendanceSummary.objects.filter(
             student = self.request.user.student_profile
         ).order_by('-year', '-month')
-
-
-
-            
-

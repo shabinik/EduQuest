@@ -3,7 +3,7 @@ import axiosInstance from '../../api/axiosInstance';
 import toast from "react-hot-toast";
 import { 
   ChevronLeft, Plus, Eye, Clock, BookOpen, 
-  Edit2, Trash2, Save, X
+  Edit2, Trash2, Save, X, Calendar, GraduationCap, LayoutGrid
 } from 'lucide-react';
 
 // --- TIME SLOT SETUP ---
@@ -41,53 +41,58 @@ const TimeSlotSetup = ({ slots, onRefresh }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Add/Edit Form */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
-        <h3 className="font-bold text-gray-800 mb-4">
-          {editId ? 'Edit Time Slot' : 'Add Time Slot'}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h3 className="font-bold text-slate-800 mb-5 flex items-center gap-2">
+          <span className="w-1.5 h-5 bg-indigo-500 rounded-full inline-block"></span>
+          {editId ? 'Edit Time Slot' : 'Add New Time Slot'}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-1 block">Start Time</label>
+            <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">Start Time</label>
             <input 
               type="time" 
-              className="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" 
+              className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition" 
               value={newSlot.start_time} 
               onChange={e => setNewSlot({...newSlot, start_time: e.target.value})} 
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-1 block">End Time</label>
+            <label className="text-xs font-semibold text-slate-500 mb-1.5 block uppercase tracking-wide">End Time</label>
             <input 
               type="time" 
-              className="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" 
+              className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition" 
               value={newSlot.end_time} 
               onChange={e => setNewSlot({...newSlot, end_time: e.target.value})} 
             />
           </div>
-          <div className="flex items-end">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input 
-                type="checkbox" 
-                checked={newSlot.is_break} 
-                onChange={e => setNewSlot({...newSlot, is_break: e.target.checked})}
-                className="w-4 h-4"
-              />
-              <span className="text-sm font-semibold text-gray-700">Mark as Break</span>
+          <div className="flex items-end pb-0.5">
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <div className="relative">
+                <input 
+                  type="checkbox" 
+                  checked={newSlot.is_break} 
+                  onChange={e => setNewSlot({...newSlot, is_break: e.target.checked})}
+                  className="sr-only peer"
+                />
+                <div className="w-10 h-6 bg-slate-200 peer-checked:bg-amber-400 rounded-full transition-colors peer-focus:ring-2 peer-focus:ring-amber-300"></div>
+                <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
+              </div>
+              <span className="text-sm font-semibold text-slate-700">Break Period</span>
             </label>
           </div>
           <div className="flex gap-2">
             <button 
               onClick={handleSave} 
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-semibold transition shadow-sm shadow-indigo-200"
             >
-              {editId ? 'Update' : 'Add'}
+              {editId ? 'Update' : 'Add Slot'}
             </button>
             {editId && (
               <button 
                 onClick={resetForm} 
-                className="px-3 py-2 text-gray-500 hover:bg-gray-100 rounded-lg transition"
+                className="px-3 py-2 text-slate-500 hover:bg-slate-100 rounded-xl transition"
               >
                 <X size={20} />
               </button>
@@ -97,55 +102,63 @@ const TimeSlotSetup = ({ slots, onRefresh }) => {
       </div>
 
       {/* Slots List */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Period</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Time</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Type</th>
-                <th className="px-6 py-3 text-right text-xs font-bold text-gray-600 uppercase">Actions</th>
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-6 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Period</th>
+                <th className="px-6 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Time Range</th>
+                <th className="px-6 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
+                <th className="px-6 py-3.5 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-slate-100">
               {slots.map((s, idx) => (
-                <tr key={s.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4 font-semibold text-gray-800">Period {idx + 1}</td>
-                  <td className="px-6 py-4 font-mono text-sm text-gray-600">
-                    {s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}
+                <tr key={s.id} className="hover:bg-slate-50/70 transition group">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <span className="w-7 h-7 bg-indigo-50 text-indigo-700 rounded-lg flex items-center justify-center text-xs font-bold">{idx + 1}</span>
+                      <span className="font-semibold text-slate-700">Period {idx + 1}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 font-mono text-sm text-slate-600 tracking-tight">
+                    {s.start_time.slice(0,5)} <span className="text-slate-300 mx-1">→</span> {s.end_time.slice(0,5)}
                   </td>
                   <td className="px-6 py-4">
                     {s.is_break ? (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
                         Break
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
                         Class
                       </span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button 
-                      onClick={() => {setEditId(s.id); setNewSlot(s)}} 
-                      className="text-indigo-600 hover:text-indigo-800 mr-3 transition"
-                    >
-                      <Edit2 size={16}/>
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(s.id)} 
-                      className="text-red-600 hover:text-red-800 transition"
-                    >
-                      <Trash2 size={16}/>
-                    </button>
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition">
+                      <button 
+                        onClick={() => {setEditId(s.id); setNewSlot(s)}} 
+                        className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded-lg transition"
+                      >
+                        <Edit2 size={15}/>
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(s.id)} 
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
+                      >
+                        <Trash2 size={15}/>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
               {slots.length === 0 && (
                 <tr>
-                  <td colSpan="4" className="px-6 py-8 text-center text-gray-400">
-                    No time slots added yet
+                  <td colSpan="4" className="px-6 py-12 text-center text-slate-400">
+                    <Clock className="mx-auto mb-2 opacity-30" size={32} />
+                    <p className="text-sm">No time slots added yet</p>
                   </td>
                 </tr>
               )}
@@ -190,32 +203,42 @@ const SubjectSetup = ({ subjects, onRefresh }) => {
     }
   };
 
+  const subjectColors = [
+    'bg-violet-50 border-violet-200 text-violet-700',
+    'bg-blue-50 border-blue-200 text-blue-700',
+    'bg-emerald-50 border-emerald-200 text-emerald-700',
+    'bg-rose-50 border-rose-200 text-rose-700',
+    'bg-amber-50 border-amber-200 text-amber-700',
+    'bg-cyan-50 border-cyan-200 text-cyan-700',
+  ];
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Add/Edit Form */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
-        <h3 className="font-bold text-gray-800 mb-4">
-          {editId ? 'Edit Subject' : 'Add Subject'}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h3 className="font-bold text-slate-800 mb-5 flex items-center gap-2">
+          <span className="w-1.5 h-5 bg-indigo-500 rounded-full inline-block"></span>
+          {editId ? 'Edit Subject' : 'Add New Subject'}
         </h3>
         <div className="flex gap-3">
           <input 
             type="text" 
-            className="flex-1 border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" 
+            className="flex-1 border border-slate-200 bg-slate-50 p-2.5 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition" 
             value={name} 
             onChange={e => setName(e.target.value)} 
-            placeholder="Subject Name"
+            placeholder="e.g. Mathematics, Physics..."
             onKeyPress={e => e.key === 'Enter' && handleSave()}
           />
           <button 
             onClick={handleSave} 
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold transition"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold transition shadow-sm shadow-indigo-200"
           >
             {editId ? 'Update' : 'Add'}
           </button>
           {editId && (
             <button 
               onClick={() => {setEditId(null); setName('')}} 
-              className="px-3 py-2 text-gray-500 hover:bg-gray-100 rounded-lg transition"
+              className="px-3 py-2 text-slate-500 hover:bg-slate-100 rounded-xl transition"
             >
               <X size={20} />
             </button>
@@ -225,31 +248,37 @@ const SubjectSetup = ({ subjects, onRefresh }) => {
 
       {/* Subjects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {subjects.map(sub => (
+        {subjects.map((sub, i) => (
           <div 
             key={sub.id} 
-            className="bg-white p-4 rounded-lg border border-gray-200 flex items-center justify-between group hover:shadow-md transition"
+            className={`bg-white p-4 rounded-2xl border flex items-center justify-between group hover:shadow-md transition ${subjectColors[i % subjectColors.length]}`}
           >
-            <span className="font-semibold text-gray-800">{sub.name}</span>
-            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/60 flex items-center justify-center text-sm font-bold">
+                {sub.name.charAt(0)}
+              </div>
+              <span className="font-semibold">{sub.name}</span>
+            </div>
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
               <button 
                 onClick={() => {setEditId(sub.id); setName(sub.name)}} 
-                className="text-indigo-600 hover:text-indigo-800 transition"
+                className="p-1.5 hover:bg-white/60 rounded-lg transition"
               >
-                <Edit2 size={16}/>
+                <Edit2 size={14}/>
               </button>
               <button 
                 onClick={() => handleDelete(sub.id)} 
-                className="text-red-600 hover:text-red-800 transition"
+                className="p-1.5 hover:bg-white/60 rounded-lg transition"
               >
-                <Trash2 size={16}/>
+                <Trash2 size={14}/>
               </button>
             </div>
           </div>
         ))}
         {subjects.length === 0 && (
-          <div className="col-span-full text-center py-8 text-gray-400">
-            No subjects added yet
+          <div className="col-span-full text-center py-12 text-slate-400">
+            <BookOpen className="mx-auto mb-2 opacity-30" size={32} />
+            <p className="text-sm">No subjects added yet</p>
           </div>
         )}
       </div>
@@ -395,109 +424,168 @@ const AdminTimeTable = () => {
     }
   };
 
+  const DAYS = [
+    { key: "mon", label: "Mon", full: "Monday" },
+    { key: "tue", label: "Tue", full: "Tuesday" },
+    { key: "wed", label: "Wed", full: "Wednesday" },
+    { key: "thu", label: "Thu", full: "Thursday" },
+    { key: "fri", label: "Fri", full: "Friday" },
+    { key: "sat", label: "Sat", full: "Saturday" }
+  ];
+
+  // Count filled cells for a timetable (from the list view, we don't have matrix, so approximate)
+  const getFilledCount = (tt) => {
+    // placeholder — real data comes from matrix
+    return null;
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="text-center">
-          <div className="inline-block w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-gray-600">Loading timetable data...</p>
+          <div className="inline-block w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-slate-500 font-medium">Loading timetable data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Time Table Management</h1>
-            <p className="text-gray-600 mt-1">Manage schedules, time slots, and subjects</p>
-          </div>
-          {view === 'grid' && (
-            <button 
-              onClick={handleClearTimetable}
-              className="text-red-600 hover:text-red-700 border border-red-300 hover:bg-red-50 px-4 py-2 rounded-lg font-semibold transition text-sm"
-            >
-              Clear Entire Grid
-            </button>
-          )}
-        </div>
 
         {view === 'list' ? (
           <>
-            {/* Tabs */}
-            <div className="flex gap-2 mb-6 bg-white p-1 rounded-lg border border-gray-200 w-fit">
+            {/* ── PAGE HEADER ── */}
+            <div className="mb-8">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Timetable Management</h1>
+                  <p className="text-slate-500 mt-1 text-sm">Configure schedules, periods, and subjects for your school</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── TAB BAR ── */}
+            <div className="flex gap-1 mb-6 bg-white p-1 rounded-xl border border-slate-200 shadow-sm w-fit">
               {[
-                { key: 'timetables', label: 'Timetables', icon: Clock },
+                { key: 'timetables', label: 'Timetables', icon: LayoutGrid },
                 { key: 'slots', label: 'Time Slots', icon: Clock },
                 { key: 'subjects', label: 'Subjects', icon: BookOpen }
               ].map(tab => (
                 <button 
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`px-6 py-2 rounded-lg font-semibold flex items-center gap-2 transition ${
+                  className={`px-5 py-2 rounded-lg font-semibold flex items-center gap-2 text-sm transition-all ${
                     activeTab === tab.key 
-                      ? 'bg-indigo-600 text-white' 
-                      : 'text-gray-600 hover:bg-gray-100'
+                      ? 'bg-indigo-600 text-white shadow-sm' 
+                      : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                   }`}
                 >
-                  <tab.icon size={16} />
+                  <tab.icon size={15} />
                   {tab.label}
                 </button>
               ))}
             </div>
 
-            {/* Timetables Tab */}
+            {/* ── TIMETABLES TAB ── */}
             {activeTab === 'timetables' && (
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                  <h2 className="text-lg font-bold text-gray-800">Class Timetables</h2>
-                  <button 
-                    onClick={() => setShowCreateModal(true)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-semibold transition"
-                  >
-                    <Plus size={18} /> Create Timetable
-                  </button>
+              <div>
+                {/* Stats strip */}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
+                    <div className="w-11 h-11 bg-indigo-50 rounded-xl flex items-center justify-center">
+                      <LayoutGrid size={20} className="text-indigo-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-extrabold text-slate-800">{timetables.length}</p>
+                      <p className="text-xs text-slate-500 font-medium">Total Timetables</p>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
+                    <div className="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center">
+                      <Clock size={20} className="text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-extrabold text-slate-800">{timeSlots.filter(s => !s.is_break).length}</p>
+                      <p className="text-xs text-slate-500 font-medium">Class Periods</p>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
+                    <div className="w-11 h-11 bg-violet-50 rounded-xl flex items-center justify-center">
+                      <BookOpen size={20} className="text-violet-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-extrabold text-slate-800">{subjects.length}</p>
+                      <p className="text-xs text-slate-500 font-medium">Subjects</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 border-b">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Class</th>
-                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Division</th>
-                        <th className="px-6 py-3 text-right text-xs font-bold text-gray-600 uppercase">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {timetables.map(tt => (
-                        <tr key={tt.id} className="hover:bg-gray-50 transition">
-                          <td className="px-6 py-4 font-semibold text-gray-800">{tt.class_name}</td>
-                          <td className="px-6 py-4 text-gray-600">{tt.division}</td>
-                          <td className="px-6 py-4 text-right">
+
+                {/* Timetable list card */}
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                    <div>
+                      <h2 className="text-base font-bold text-slate-800">Class Timetables</h2>
+                      <p className="text-xs text-slate-400 mt-0.5">{timetables.length} schedule{timetables.length !== 1 ? 's' : ''} configured</p>
+                    </div>
+                    <button 
+                      onClick={() => setShowCreateModal(true)}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-semibold text-sm transition shadow-sm shadow-indigo-200"
+                    >
+                      <Plus size={16} /> New Timetable
+                    </button>
+                  </div>
+
+                  {timetables.length === 0 ? (
+                    <div className="px-6 py-16 text-center">
+                      <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <Calendar size={28} className="text-slate-400" />
+                      </div>
+                      <p className="font-semibold text-slate-600 mb-1">No timetables yet</p>
+                      <p className="text-sm text-slate-400 mb-4">Create a timetable to start scheduling classes</p>
+                      <button 
+                        onClick={() => setShowCreateModal(true)}
+                        className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl font-semibold text-sm transition"
+                      >
+                        <Plus size={15} /> Create First Timetable
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-slate-100">
+                      {timetables.map((tt, idx) => (
+                        <div 
+                          key={tt.id} 
+                          className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/70 transition group"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-700 rounded-xl flex items-center justify-center font-bold text-sm">
+                              {tt.class_name?.charAt(0) || idx + 1}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-800 text-sm">{tt.class_name}</p>
+                              <p className="text-xs text-slate-500">Division {tt.division}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              Active
+                            </span>
                             <button 
                               onClick={() => {
                                 setActiveTimetable(tt);
                                 fetchMatrix(tt.id);
                                 setView('grid');
                               }}
-                              className="text-indigo-600 hover:text-indigo-800 font-semibold inline-flex items-center gap-1 transition"
+                              className="flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition"
                             >
-                              <Eye size={16}/> View Grid
+                              <LayoutGrid size={14}/> Open Grid
                             </button>
-                          </td>
-                        </tr>
+                          </div>
+                        </div>
                       ))}
-                      {timetables.length === 0 && (
-                        <tr>
-                          <td colSpan="3" className="px-6 py-12 text-center text-gray-400">
-                            No timetables created yet. Click "Create Timetable" to get started.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -508,129 +596,148 @@ const AdminTimeTable = () => {
             {/* Subjects Tab */}
             {activeTab === 'subjects' && <SubjectSetup subjects={subjects} onRefresh={fetchInitialData} />}
           </>
+
         ) : (
-          // Timetable Grid View
-          <div className="bg-white rounded-lg border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-4">
-              <button 
-                onClick={() => setView('list')}
-                className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition"
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">
-                  {activeTimetable?.class_name} - {activeTimetable?.division}
-                </h2>
-                <p className="text-sm text-gray-600">Click on any cell to assign a subject and teacher</p>
+          // ── TIMETABLE GRID VIEW ──
+          <div>
+            {/* Grid header */}
+            <div className="mb-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setView('list')}
+                  className="p-2 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl text-slate-500 transition shadow-sm"
+                >
+                  <ChevronLeft size={22} />
+                </button>
+                <div>
+                  <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                    {activeTimetable?.class_name} 
+                    <span className="text-slate-400 font-normal mx-2">·</span>
+                    <span className="text-indigo-600">Division {activeTimetable?.division}</span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Click any cell to assign or edit a period</p>
+                </div>
               </div>
+              <button 
+                onClick={handleClearTimetable}
+                className="text-red-500 hover:text-red-600 border border-red-200 hover:border-red-300 hover:bg-red-50 px-4 py-2 rounded-xl font-semibold transition text-sm flex items-center gap-1.5"
+              >
+                <Trash2 size={14}/> Clear All
+              </button>
             </div>
-            
-            <div className="p-6 overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-300 px-4 py-3 text-sm font-bold text-gray-700 text-center min-w-[100px]">
-                      Day / Time
-                    </th>
-                    {timeSlots.map(slot => (
-                      <th 
-                        key={slot.id}
-                        className="border border-gray-300 px-3 py-3 text-center min-w-[140px]"
-                      >
-                        <div className="text-xs font-semibold text-gray-600">
-                          {slot.start_time.slice(0,5)}
-                        </div>
-                        <div className="text-xs font-semibold text-gray-600">
-                          {slot.end_time.slice(0,5)}
-                        </div>
+
+            {/* Grid card */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      {/* Corner cell */}
+                      <th className="bg-slate-50 border-b border-r border-slate-200 px-4 py-3 min-w-[100px]">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Day</span>
                       </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { key: "mon", label: "Monday" },
-                    { key: "tue", label: "Tuesday" },
-                    { key: "wed", label: "Wednesday" },
-                    { key: "thu", label: "Thursday" },
-                    { key: "fri", label: "Friday" },
-                    { key: "sat", label: "Saturday" }
-                  ].map(day => (
-                    <tr key={day.key}>
-                      <td className="border border-gray-300 px-4 py-3 font-bold text-gray-800 bg-gray-50 text-center">
-                        {day.label}
-                      </td>
-                      {timeSlots.map(slot => {
-                        const cell = matrix[day.key]?.[slot.id];
-                        return (
-                          <td 
-                            key={`${day.key}-${slot.id}`}
-                            className="border border-gray-300 p-2 h-24"
-                          >
-                            {slot.is_break ? (
-                              <div className="h-full flex items-center justify-center bg-amber-50 rounded text-xs font-bold text-amber-700">
-                                BREAK
-                              </div>
-                            ) : (
-                              <button 
-                                onClick={() => openGridModal(day.key, slot.id, cell)}
-                                className={`w-full h-full rounded p-2 text-center transition ${
-                                  cell 
-                                    ? 'bg-indigo-50 hover:bg-indigo-100 border border-indigo-200' 
-                                    : 'border-2 border-dashed border-gray-200 hover:bg-gray-50 hover:border-gray-300'
-                                }`}
-                              >
-                                {cell ? (
-                                  <div className="space-y-1">
-                                    <div className="text-sm font-bold text-indigo-900">
-                                      {cell.subject}
-                                    </div>
-                                    <div className="text-xs text-gray-600">
-                                      {cell.teacher}
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <Plus size={20} className="mx-auto text-gray-400" />
-                                )}
-                              </button>
-                            )}
-                          </td>
-                        );
-                      })}
+                      {timeSlots.map((slot, i) => (
+                        <th 
+                          key={slot.id}
+                          className={`border-b border-r last:border-r-0 border-slate-200 px-3 py-3 text-center min-w-[150px] ${slot.is_break ? 'bg-amber-50' : 'bg-slate-50'}`}
+                        >
+                          <div className={`text-xs font-bold uppercase tracking-wide mb-0.5 ${slot.is_break ? 'text-amber-600' : 'text-slate-500'}`}>
+                            {slot.is_break ? 'Break' : `P${i + 1}`}
+                          </div>
+                          <div className="font-mono text-xs text-slate-500 font-semibold">
+                            {slot.start_time.slice(0,5)}–{slot.end_time.slice(0,5)}
+                          </div>
+                        </th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {DAYS.map((day, di) => (
+                      <tr key={day.key} className={di % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'}>
+                        <td className="border-b border-r border-slate-200 px-4 py-2 bg-slate-50/80">
+                          <div>
+                            <p className="text-xs font-bold text-slate-700">{day.full}</p>
+                            <p className="text-[10px] text-slate-400 uppercase tracking-wider">{day.label}</p>
+                          </div>
+                        </td>
+                        {timeSlots.map(slot => {
+                          const cell = matrix[day.key]?.[slot.id];
+                          return (
+                            <td 
+                              key={`${day.key}-${slot.id}`}
+                              className="border-b border-r last:border-r-0 border-slate-200 p-1.5 h-20 align-top"
+                            >
+                              {slot.is_break ? (
+                                <div className="h-full flex items-center justify-center bg-amber-50 rounded-lg text-xs font-bold text-amber-600 tracking-wide border border-amber-100">
+                                  ☕ Break
+                                </div>
+                              ) : (
+                                <button 
+                                  onClick={() => openGridModal(day.key, slot.id, cell)}
+                                  className={`w-full h-full rounded-xl p-2 text-left transition-all ${
+                                    cell 
+                                      ? 'bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 hover:border-indigo-300 hover:shadow-sm' 
+                                      : 'border-2 border-dashed border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30'
+                                  }`}
+                                >
+                                  {cell ? (
+                                    <div>
+                                      <div className="text-xs font-bold text-indigo-900 leading-tight mb-0.5">
+                                        {cell.subject}
+                                      </div>
+                                      <div className="text-[11px] text-slate-500 leading-tight">
+                                        {cell.teacher}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="h-full flex items-center justify-center">
+                                      <Plus size={18} className="text-slate-300" />
+                                    </div>
+                                  )}
+                                </button>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Entry Modal */}
+        {/* ── ENTRY MODAL ── */}
         {showEntryModal && (
-          <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg w-full max-w-md p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-gray-900">
-                  {modalData.entryId ? 'Edit Period' : 'Assign Period'}
-                </h3>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-200">
+              <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    {modalData.entryId ? 'Edit Period' : 'Assign Period'}
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5 capitalize">
+                    {DAYS.find(d => d.key === modalData.day)?.full}
+                  </p>
+                </div>
                 <button 
                   onClick={() => setShowEntryModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition"
+                  className="p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-lg transition"
                 >
-                  <X size={20}/>
+                  <X size={18}/>
                 </button>
               </div>
               
-              <div className="space-y-4">
+              <div className="p-6 space-y-4">
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 mb-2 block">Subject</label>
+                  <label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">Subject</label>
                   <select 
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition text-sm"
                     value={formData.subject}
                     onChange={e => setFormData({...formData, subject: e.target.value})}
                   >
-                    <option value="">Select Subject</option>
+                    <option value="">Select a subject…</option>
                     {subjects.map(s => (
                       <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
@@ -638,33 +745,33 @@ const AdminTimeTable = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 mb-2 block">Teacher</label>
+                  <label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">Teacher</label>
                   <select 
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition text-sm"
                     value={formData.teacher}
                     onChange={e => setFormData({...formData, teacher: e.target.value})}
                   >
-                    <option value="">Select Teacher</option>
+                    <option value="">Select a teacher…</option>
                     {teachers.map(t => (
                       <option key={t.id} value={t.id}>{t.full_name}</option>
                     ))}
                   </select>
                 </div>
 
-                <div className="pt-4 space-y-2">
+                <div className="pt-2 space-y-2">
                   <button 
                     onClick={handleSaveEntry}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition"
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition shadow-sm shadow-indigo-200"
                   >
-                    <Save size={18}/> {modalData.entryId ? 'Update Period' : 'Save Period'}
+                    <Save size={16}/> {modalData.entryId ? 'Update Period' : 'Save Period'}
                   </button>
                   
                   {modalData.entryId && (
                     <button 
                       onClick={handleDeleteEntry}
-                      className="w-full text-red-600 hover:bg-red-50 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition"
+                      className="w-full text-red-500 hover:bg-red-50 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition border border-red-100 hover:border-red-200"
                     >
-                      <Trash2 size={18}/> Clear Period
+                      <Trash2 size={16}/> Clear Period
                     </button>
                   )}
                 </div>
@@ -673,53 +780,58 @@ const AdminTimeTable = () => {
           </div>
         )}
 
-        {/* Create Timetable Modal */}
+        {/* ── CREATE TIMETABLE MODAL ── */}
         {showCreateModal && (
-          <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg w-full max-w-md p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-gray-900">Create Timetable</h3>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-200">
+              <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Create Timetable</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Set up a weekly schedule for a class</p>
+                </div>
                 <button 
                   onClick={() => setShowCreateModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition"
+                  className="p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-lg transition"
                 >
-                  <X size={20}/>
+                  <X size={18}/>
                 </button>
               </div>
               
-              <div className="space-y-4">
+              <div className="p-6 space-y-4">
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 mb-2 block">
-                    Select Class & Division
+                  <label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">
+                    Class & Division
                   </label>
                   <select 
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full border border-slate-200 bg-slate-50 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition text-sm"
                     value={selectedClassId}
                     onChange={(e) => setSelectedClassId(e.target.value)}
                   >
-                    <option value="">Choose a class...</option>
-                    {classes.map(cls=> (
+                    <option value="">Choose a class…</option>
+                    {classes.map(cls => (
                       <option key={cls.id} value={cls.id}>
                         {cls.label}
                       </option>
                     ))}
                   </select>
-                <p className="text-xs text-gray-500 mt-2">
-                  Only classes without an existing timetable can be selected
-                </p>
+                  <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-slate-300 rounded-full inline-block"></span>
+                    Only classes without an existing timetable can be selected
+                  </p>
+                </div>
+                <button 
+                  onClick={handleCreateTimetable}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition shadow-sm shadow-indigo-200 mt-2"
+                >
+                  <Plus size={16}/> Create Timetable
+                </button>
               </div>
-              <button 
-                onClick={handleCreateTimetable}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition"
-              >
-                <Plus size={18}/> Create Timetable
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+      </div>
     </div>
-  </div>
-);
+  );
 };
 export default AdminTimeTable;

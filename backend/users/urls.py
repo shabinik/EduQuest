@@ -18,5 +18,4 @@ urlpatterns = [
     path('students/delete/<int:student_id>/',DeleteStudentView.as_view(),name='delete-student'),
     path("students/update/<int:student_id>/",UpdateStudentView.as_view(),name='update-student'),
     path("students/<int:student_id>/",AdminStudentDetailView.as_view(),name="admin-student-detail"),
-
 ] 

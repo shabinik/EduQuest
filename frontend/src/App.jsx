@@ -48,6 +48,10 @@ import StudentExamPage from './pages/student/StudentExamPage'
 import AdminFeeManagement from './pages/admin/AdminFeeManagement'
 import StudentFeeManagement from './pages/student/StudentFeeManagement'
 import SchoolExpenseManagement from './pages/admin/SchoolExpenseManagement'
+import StudentAIChat from './pages/student/StudentAIChat'
+import AdminMeetings from './pages/admin/AdminMeetings'
+import TeacherMeetings from './pages/teacher/TeacherMeetings'
+import StudentMeetings from './pages/student/StudentMeetings'
 
 
 function App() {
@@ -112,6 +116,7 @@ function App() {
           <Route path='timetable' element={<RequireActiveSubscription><AdminTimeTable/></RequireActiveSubscription>} />
           <Route path='fee-management' element={<RequireActiveSubscription><AdminFeeManagement/></RequireActiveSubscription>} />
           <Route path='expenses' element={<RequireActiveSubscription><SchoolExpenseManagement/></RequireActiveSubscription>} />
+          <Route path='meetings' element={<RequireActiveSubscription><AdminMeetings/></RequireActiveSubscription>} />
         </Route>
         
         <Route path="/teacher/login" element={<TeacherLogin />} />
@@ -124,6 +129,7 @@ function App() {
           <Route path='assignment' element={<RequireActiveSubscription><TeacherAssignmentsPage /></RequireActiveSubscription>} />
           <Route path='attendance' element={<RequireActiveSubscription><TeacherAttendance /></RequireActiveSubscription>} />
           <Route path='exam' element={<RequireActiveSubscription><TeacherExamManagement /></RequireActiveSubscription>} />
+          <Route path='meetings' element={<RequireActiveSubscription><TeacherMeetings /></RequireActiveSubscription>} />
         </Route>
 
         <Route path='/student/login' element={<StudentLogin />} />
@@ -136,10 +142,11 @@ function App() {
           <Route path='attendance' element={<RequireActiveSubscription><StudentAttendance /></RequireActiveSubscription>} />
           <Route path='exam' element={<RequireActiveSubscription><StudentExamPage /></RequireActiveSubscription>} />
           <Route path='fee-management' element={<RequireActiveSubscription><StudentFeeManagement /></RequireActiveSubscription>} />
+          <Route path='ai-chat' element={<RequireActiveSubscription><StudentAIChat/></RequireActiveSubscription>} />
+          <Route path='meetings' element={<RequireActiveSubscription><StudentMeetings/></RequireActiveSubscription>} />
         </Route>
 
         <Route path='/forgot-password' element={<ForgotPassword/>} />
-
         <Route path = "*" element={<Navigate to="/login"/>} />
       </Routes>
     </BrowserRouter>

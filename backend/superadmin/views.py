@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from accounts.models import Tenant
 from . seralizers import TenantListSerializer,TenantBillingSerializer
 from rest_framework.response import Response
+from rest_framework import status
 
 # Create your views here.
 
@@ -37,10 +38,11 @@ class SuperAdminTenantStatusView(APIView):
 class SuperAdminTenantDeleteView(APIView):
     permission_classes = [IsAuthenticated,IsSuperAdmin]
 
-    def post(self, request, tenant_id):
+    def delete(self, request, tenant_id):
         tenant = get_object_or_404(Tenant,id = tenant_id)
         tenant.delete()
-        return Response({"success":True})
+        return Response({"success": True, "message": "Tenant deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT)
     
 
 

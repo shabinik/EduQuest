@@ -27,5 +27,6 @@ urlpatterns = [
     path('api/academics/',include('academics.urls')),
     path('api/assignment/',include('assignment.urls')),
     path('api/exam/',include('exam.urls')),
-    path('api/finance/',include('finance.urls'))
+    path('api/finance/',include('finance.urls')),
+    path('api/chatvideo/',include('chatvideo.urls')),
 ]

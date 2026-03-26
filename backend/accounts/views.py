@@ -10,11 +10,12 @@ from rest_framework.parsers import MultiPartParser,FormParser
 from accounts.models import User
 from subscription.models import Subscription
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import AllowAny,IsAuthenticated
 
 # Create your views here.
 
 class LoginView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def post(self,request):
         serializer = LoginSerializer(data = request.data)
@@ -74,7 +75,7 @@ class LoginView(APIView):
     
 
 class LogoutView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def post(self,request):
 
@@ -92,7 +93,7 @@ class LogoutView(APIView):
     
 
 class ProfileView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         serializer = UserSerializer(request.user)
@@ -100,7 +101,7 @@ class ProfileView(APIView):
     
 
 class ProfileImageUploadView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self,request):
@@ -126,6 +127,7 @@ class ProfileImageUploadView(APIView):
 
 
 class AdminSingupView(APIView):
+    permission_classes = [AllowAny]
     def post(self,request):
         serializer = AdminSignupSerializer(data = request.data)
         if serializer.is_valid():
@@ -137,6 +139,7 @@ class AdminSingupView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AdminResendOtpView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         serializer = AdminResendOtpSerializer(data = request.data)
         if serializer.is_valid():
@@ -146,6 +149,7 @@ class AdminResendOtpView(APIView):
           
 
 class AdminVerifyEmailView(APIView):
+    permission_classes = [AllowAny]
     def post(self,request):
         serializer = AdminVerifyEmailSerializer(data = request.data)
         if serializer.is_valid():
@@ -155,7 +159,7 @@ class AdminVerifyEmailView(APIView):
     
 
 class AdminProfileView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         if request.user.role != "admin":
@@ -180,7 +184,7 @@ class AdminProfileView(APIView):
 
    
 class ChangePasswordView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def put(self,request):
         serializer = ChangePasswordSerializer(data = request.data, context={"request":request})
@@ -195,7 +199,7 @@ class ChangePasswordView(APIView):
     
 
 class ForgotPasswordView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = ForgotPasswordSerializer(data = request.data)
@@ -205,7 +209,7 @@ class ForgotPasswordView(APIView):
     
 
 class ResetPasswordView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = ResetPasswordSerializer(data = request.data)
@@ -215,7 +219,7 @@ class ResetPasswordView(APIView):
     
 
 class ForgotPasswordResendOtpView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = ForgotPasswordResendOtpSerializer(data = request.data)
