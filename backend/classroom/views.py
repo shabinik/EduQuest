@@ -9,6 +9,7 @@ from . models import SchoolClass,Subject,TimeSlot,TimeTable,TimeTableEntry
 from rest_framework import generics 
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404 
+from users.models import Student
 
 # Create your views here.
 # Class Time Table
@@ -183,6 +184,37 @@ class TeacherClassView(APIView):
             ]
          })
     
+
+
+class TeacherStudentDetailView(APIView):
+    permission_classes = [IsAuthenticated,IsTeacher, HasActiveSubscription]
+
+    def get(self,request,student_id):
+        teacher = request.user.teacher_profile
+
+        try:
+            student = Student.objects.select_related("user","school_class").get(
+                id = student_id,
+                school_class__class_teacher = teacher,
+                user__tenant = request.user.tenant,
+            )
+        except Student.DoesNotExist:
+            return Response({"details":"Student not found"}, status=404)
+        
+        return Response({
+            "id": student.id,
+            "name": student.user.full_name,
+            "email": student.user.email,
+            "roll_number": student.roll_number,
+            "admission_number": student.admission_number,
+            "date_of_birth": student.user.DOB,
+            "gender": student.user.gender,
+            "phone": student.user.phone,
+            "parent_name": student.guardian_name,
+            "parent_phone": student.guardian_contact,
+            "class_name": str(student.school_class),
+            "joined_date": student.created_at.date(),
+        })
 
 
 class BaseTenantViewSet(viewsets.ModelViewSet):

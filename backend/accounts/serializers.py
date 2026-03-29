@@ -35,6 +35,11 @@ class LoginSerializer(serializers.Serializer):
         if not user:
             raise serializers.ValidationError("Invalid username or password.")
         
+        if user.tenant and user.tenant.status == "suspended":
+            raise serializers.ValidationError(
+                "Your institute account is suspended. Please contact support."
+            )
+        
         #JWT Tokens
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
@@ -192,7 +197,7 @@ class AdminVerifyEmailSerializer(serializers.Serializer):
 
         tenant = user.tenant
         if tenant:
-            tenant.status = "inactive"
+            tenant.status = "active"
             tenant.save()
 
 

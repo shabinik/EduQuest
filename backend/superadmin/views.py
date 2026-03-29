@@ -13,7 +13,7 @@ class SuperAdminTenantListView(APIView):
     permission_classes = [IsAuthenticated,IsSuperAdmin]
 
     def get(self,request):
-        tenants = Tenant.objects.all().order_by("created_at")
+        tenants = Tenant.objects.all().order_by("-created_at")
         serializer = TenantListSerializer(tenants, many=True)
         return Response(serializer.data)
     

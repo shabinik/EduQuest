@@ -29,6 +29,8 @@ from rest_framework.views import APIView
 from django.utils import timezone
 from decimal import Decimal
 from rest_framework.pagination import PageNumberPagination
+from . fee_receipt_utils import generate_fee_receipt_pdf
+from django.http import HttpResponse
 
 # Create your views here.
 
@@ -182,7 +184,7 @@ class StudentMyBillListView(generics.ListAPIView):
         return StudentBill.objects.filter(
             student=self.request.user.student_profile,
             tenant=self.request.user.tenant
-        )
+        ).order_by("-created_at")
     
 
 
@@ -275,10 +277,35 @@ class VerifyStudentBillPaymentView(APIView):
         return Response({
             "success": True,
             "message": "Fee payment successful",
-            "receipt_number": payment.receipt_number
+            "receipt_number": payment.receipt_number,
+            "payment_id": payment.id,
         })
 
 
+class DownloadStudentFeeReceiptView(APIView):
+    permission_classes = [IsAuthenticated]
+ 
+    def get(self, request, payment_id):
+        payment = get_object_or_404(
+            Payment.objects.select_related(
+                "bill__student__user",
+                "bill__student__school_class",
+                "bill__fee_structure__fee_type",
+                "tenant",
+                "collected_by",
+            ),
+            id=payment_id,
+            tenant=request.user.tenant,
+            bill__student=request.user.student_profile,
+        )
+ 
+        pdf_bytes = generate_fee_receipt_pdf(payment)
+        filename = f"EduQuest_Receipt_{payment.receipt_number}.pdf"
+ 
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response["Content-Length"] = len(pdf_bytes)
+        return response
 
 
 # EXPENSES OF A SCHOOL

@@ -16,6 +16,7 @@ from .views import (
     StudentMyBillListView,
     CreateStudentBillOrderView,
     VerifyStudentBillPaymentView,
+    DownloadStudentFeeReceiptView,
     
     # Expense Categories
     ExpenseCategoryListCreateView,
@@ -48,6 +49,7 @@ urlpatterns = [
     path("student/bills/",StudentMyBillListView.as_view(),name="student-my-bills"),
     path("student/bills/<int:bill_id>/create-order/",CreateStudentBillOrderView.as_view(),name="student-create-bill-order"),
     path("student/bills/verify-payment/",VerifyStudentBillPaymentView.as_view(),name="student-verify-bill-payment"),
+    path("student/bills/receipt/<int:payment_id>/",DownloadStudentFeeReceiptView.as_view()),
 
     #School Expense
     path('expenses/categories/',ExpenseCategoryListCreateView.as_view(),name='expense-category-list-create'),

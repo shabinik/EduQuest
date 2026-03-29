@@ -41,11 +41,19 @@ export default function StudentLogin() {
         navigate("/student");
       }
     } catch (err) {
-      if (err.response?.status === 401) {
-        setError("Invalid email or password");
-      } else {
-        setError("Something went wrong. Please try again.");
-      }
+        if (err.response?.data) {
+            const data = err.response.data;
+            // DRF ValidationError wraps messages in non_field_errors
+            if (data.non_field_errors) {
+                setError(data.non_field_errors[0]);
+            } else if (data.detail) {
+                setError(data.detail);
+            } else {
+                setError("Something went wrong. Please try again.");
+            }
+        } else {
+            setError("Something went wrong. Please try again.");
+        }
     } finally {
       setLoading(false);
     }

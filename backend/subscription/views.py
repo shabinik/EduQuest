@@ -10,6 +10,8 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from . razorpay_client import get_razorpay_client
+from .invoice_utils import generate_invoice_pdf
+from django.http import HttpResponse
 
 
 
@@ -153,6 +155,7 @@ class VerifyPaymentView(APIView):
             "message":"Payment verified",
             "has_active_subscription":True,
             "expiry_date":subscription.expiry_date,
+            "payment_id": payment.id,
         })
     
 
@@ -185,5 +188,24 @@ class SubscriptionStatusView(APIView):
         })
     
 
-        
+
+class DownloadInvoiceView(APIView):
+    permission_classes = [IsAuthenticated,IsAdmin]
+
+    def get(self,request, payment_id):
+        payment = get_object_or_404(
+            Payment.objects.select_related("subscription__plan","tenant"),
+            id = payment_id,
+            tenant = request.user.tenant,
+            status = "paid",
+        )
+
+        pdf_bytes = generate_invoice_pdf(payment)
+
+        invoice_filename = f"EduQuest_Invoice_{payment.id:05d}.pdf"
+
+        response = HttpResponse(pdf_bytes, content_type = "application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{invoice_filename}"'
+        response["Content-Length"] = len(pdf_bytes)
+        return response
 

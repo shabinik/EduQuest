@@ -5,7 +5,7 @@ from . views import (
     ClassDropdownView,ClassDetailView,TeacherClassView,
     SubjectViewSet,TimeSlotViewSet,TimeTableViewSet,TimeTableEntryViewSet,
     StudentTimeTableView,TeacherTimeTableView,
-    TeacherSubjectDropDownView,TeacherClassDropDownView
+    TeacherSubjectDropDownView,TeacherClassDropDownView,TeacherStudentDetailView
 )
 
 
@@ -30,4 +30,5 @@ urlpatterns = [
 
     path("teacher/subjects/dropdown/", TeacherSubjectDropDownView.as_view()),
     path("teacher/classes/dropdown/", TeacherClassDropDownView.as_view()),
+    path("teacher/student/<int:student_id>/", TeacherStudentDetailView.as_view()),
 ]

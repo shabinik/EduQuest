@@ -7,6 +7,7 @@ from . views import (
     VerifyPaymentView,
     TenantSubscriptionsView,
     SubscriptionStatusView,
+    DownloadInvoiceView,
 )
 
 urlpatterns = [
@@ -17,4 +18,5 @@ urlpatterns = [
     path('verify-payment/',VerifyPaymentView.as_view()),
     path('tenant-subscriptions/',TenantSubscriptionsView.as_view()),
     path("status/", SubscriptionStatusView.as_view()),
+    path("invoice/<int:payment_id>/",  DownloadInvoiceView.as_view()),
 ]

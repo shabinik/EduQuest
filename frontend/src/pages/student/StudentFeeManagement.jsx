@@ -2,15 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../api/axiosInstance';
 import toast from 'react-hot-toast';
 
-// Student Bills List Component
+// ── Student Bills List ────────────────────────────────────────────────────────
 const StudentBillsList = ({ onPayBill }) => {
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, pending, paid, overdue
+  const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
-    fetchMyBills();
-  }, []);
+  useEffect(() => { fetchMyBills(); }, []);
 
   const fetchMyBills = async () => {
     try {
@@ -18,7 +16,7 @@ const StudentBillsList = ({ onPayBill }) => {
       const response = await axiosInstance.get('finance/student/bills/');
       setBills(response.data);
     } catch (error) {
-      toast.error('Error fetching bills:', error);
+      toast.error('Error fetching bills');
     } finally {
       setLoading(false);
     }
@@ -27,18 +25,18 @@ const StudentBillsList = ({ onPayBill }) => {
   const getStatusColor = (status) => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      paid: 'bg-green-100 text-green-800 border-green-300',
+      paid:    'bg-green-100 text-green-800 border-green-300',
       overdue: 'bg-red-100 text-red-800 border-red-300'
     };
     return colors[status] || 'bg-gray-100 text-gray-800 border-gray-300';
   };
 
-  const filteredBills = bills.filter(bill => {
-    if (filter === 'all') return true;
-    return bill.status === filter;
-  });
+  const filteredBills = bills.filter(bill =>
+    filter === 'all' ? true : bill.status === filter
+  );
 
-  const totalPending = bills.filter(b => b.status === 'pending' || b.status === 'overdue')
+  const totalPending = bills
+    .filter(b => b.status === 'pending' || b.status === 'overdue')
     .reduce((sum, b) => sum + parseFloat(b.amount), 0);
 
   if (loading) {
@@ -70,37 +68,27 @@ const StudentBillsList = ({ onPayBill }) => {
         </div>
         <div className="bg-white p-4 rounded-lg shadow border-l-4 border-red-600">
           <p className="text-sm text-gray-600">Total Pending Amount</p>
-          <p className="text-2xl font-bold">₹{totalPending.toFixed(2)}</p>
+          <p className="text-2xl font-bold">Rs.{totalPending.toFixed(2)}</p>
         </div>
       </div>
 
       {/* Filter Buttons */}
       <div className="bg-white p-4 rounded-lg shadow">
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded ${filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-          >
-            All Bills
-          </button>
-          <button
-            onClick={() => setFilter('pending')}
-            className={`px-4 py-2 rounded ${filter === 'pending' ? 'bg-yellow-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-          >
-            Pending
-          </button>
-          <button
-            onClick={() => setFilter('paid')}
-            className={`px-4 py-2 rounded ${filter === 'paid' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-          >
-            Paid
-          </button>
-          <button
-            onClick={() => setFilter('overdue')}
-            className={`px-4 py-2 rounded ${filter === 'overdue' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-          >
-            Overdue
-          </button>
+          {[
+            { key: 'all',     label: 'All Bills',  active: 'bg-blue-600'   },
+            { key: 'pending', label: 'Pending',     active: 'bg-yellow-600' },
+            { key: 'paid',    label: 'Paid',        active: 'bg-green-600'  },
+            { key: 'overdue', label: 'Overdue',     active: 'bg-red-600'    },
+          ].map(f => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`px-4 py-2 rounded ${filter === f.key ? `${f.active} text-white` : 'bg-gray-200 text-gray-700'}`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -122,16 +110,10 @@ const StudentBillsList = ({ onPayBill }) => {
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
-                    <div>
-                      <span className="font-medium">Amount:</span> ₹{bill.amount}
-                    </div>
-                    <div>
-                      <span className="font-medium">Due Date:</span> {new Date(bill.due_date).toLocaleDateString()}
-                    </div>
+                    <div><span className="font-medium">Amount:</span> Rs.{bill.amount}</div>
+                    <div><span className="font-medium">Due Date:</span> {new Date(bill.due_date).toLocaleDateString()}</div>
                     {bill.paid_date && (
-                      <div>
-                        <span className="font-medium">Paid On:</span> {new Date(bill.paid_date).toLocaleDateString()}
-                      </div>
+                      <div><span className="font-medium">Paid On:</span> {new Date(bill.paid_date).toLocaleDateString()}</div>
                     )}
                   </div>
                 </div>
@@ -160,28 +142,24 @@ const StudentBillsList = ({ onPayBill }) => {
 };
 
 
-
-// Payment Component
+// ── Payment Component ─────────────────────────────────────────────────────────
 const PaymentComponent = ({ bill, onClose, onSuccess }) => {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
 
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
+  const loadRazorpayScript = () => new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
 
   const handlePayment = async () => {
     try {
       setProcessing(true);
       setError('');
 
-      // Load Razorpay script
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
         setError('Failed to load payment gateway. Please try again.');
@@ -189,49 +167,43 @@ const PaymentComponent = ({ bill, onClose, onSuccess }) => {
         return;
       }
 
-      // Create order
       const orderResponse = await axiosInstance.post(`finance/student/bills/${bill.id}/create-order/`);
       const orderData = orderResponse.data;
 
-      // Razorpay options
       const options = {
         key: orderData.razorpay_key,
         amount: orderData.amount * 100,
         currency: orderData.currency,
         name: 'School Fee Payment',
-        description: `${bill.fee_type} - ${bill.admission_number}`,
+        description: `${bill.fee_type}`,
         order_id: orderData.order_id,
         handler: async function (response) {
           try {
-            // Verify payment
             const verifyResponse = await axiosInstance.post('finance/student/bills/verify-payment/', {
               bill_id: bill.id,
-              razorpay_order_id: response.razorpay_order_id,
+              razorpay_order_id:  response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
+              razorpay_signature:  response.razorpay_signature,
             });
 
             if (verifyResponse.data.success) {
               onSuccess(verifyResponse.data);
             } else {
               setError('Payment verification failed. Please contact support.');
-              toast.error('Payment verification failed. Please contact support.')
+              toast.error('Payment verification failed.');
             }
           } catch (err) {
-            setError('Payment verification failed: ' + (err.response?.data?.error || err.message));
-            toast.error('Payment verification failed: ' + (err.response?.data?.error || err.message))
+            const msg = err.response?.data?.error || err.message;
+            setError('Payment verification failed: ' + msg);
+            toast.error('Payment verification failed: ' + msg);
           } finally {
             setProcessing(false);
           }
         },
-        prefill: {
-          name: bill.student_name,
-        },
-        theme: {
-          color: '#2563eb'
-        },
+        prefill: { name: bill.student_name },
+        theme: { color: '#2563eb' },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             setProcessing(false);
             setError('Payment cancelled');
           }
@@ -242,8 +214,9 @@ const PaymentComponent = ({ bill, onClose, onSuccess }) => {
       razorpay.open();
 
     } catch (err) {
-      setError('Failed to initiate payment: ' + (err.response?.data?.error || err.message));
-      toast.error('Failed to initiate payment: ' + (err.response?.data?.error || err.message))
+      const msg = err.response?.data?.error || err.message;
+      setError('Failed to initiate payment: ' + msg);
+      toast.error('Failed to initiate payment: ' + msg);
       setProcessing(false);
     }
   };
@@ -253,41 +226,31 @@ const PaymentComponent = ({ bill, onClose, onSuccess }) => {
       <div className="bg-white rounded-lg max-w-md w-full p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold">Payment Details</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-            disabled={processing}
-          >
-            ✕
-          </button>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700" disabled={processing}>✕</button>
         </div>
 
         <div className="space-y-4">
-          <div className="bg-gray-50 p-4 rounded">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Fee Type:</span>
-                <span className="font-semibold">{bill.fee_type}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Admission Number:</span>
-                <span className="font-semibold">{bill.admission_number}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Due Date:</span>
-                <span className="font-semibold">{new Date(bill.due_date).toLocaleDateString()}</span>
-              </div>
-              <div className="flex justify-between border-t pt-2 mt-2">
-                <span className="text-gray-600 font-medium">Amount to Pay:</span>
-                <span className="font-bold text-lg text-blue-600">₹{bill.amount}</span>
-              </div>
+          <div className="bg-gray-50 p-4 rounded space-y-2">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Fee Type:</span>
+              <span className="font-semibold">{bill.fee_type}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Admission No:</span>
+              <span className="font-semibold">{bill.admission_number}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Due Date:</span>
+              <span className="font-semibold">{new Date(bill.due_date).toLocaleDateString()}</span>
+            </div>
+            <div className="flex justify-between border-t pt-2 mt-2">
+              <span className="text-gray-600 font-medium">Amount to Pay:</span>
+              <span className="font-bold text-lg text-blue-600">Rs.{bill.amount}</span>
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>
           )}
 
           <div className="flex gap-3">
@@ -312,29 +275,96 @@ const PaymentComponent = ({ bill, onClose, onSuccess }) => {
   );
 };
 
-// Success Modal Component
+
+// ── Success Modal with Receipt Download ───────────────────────────────────────
 const SuccessModal = ({ data, onClose }) => {
+  const [downloading, setDownloading] = useState(false);
+
+  const downloadReceipt = async () => {
+    if (!data.payment_id) {
+      toast.error('Receipt not available. Please contact support.');
+      return;
+    }
+
+    try {
+      setDownloading(true);
+      const res = await axiosInstance.get(
+        `finance/student/bills/receipt/${data.payment_id}/`,
+        { responseType: 'blob' }
+      );
+
+      const url  = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href  = url;
+      link.setAttribute('download', `EduQuest_Receipt_${data.receipt_number}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success('Receipt downloaded!');
+    } catch {
+      toast.error('Failed to download receipt. Please try again.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-md w-full p-6">
         <div className="text-center">
+          {/* Success Icon */}
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
             </svg>
           </div>
+
           <h3 className="text-2xl font-bold text-green-600 mb-2">Payment Successful!</h3>
           <p className="text-gray-600 mb-4">{data.message}</p>
-          <div className="bg-gray-50 p-4 rounded mb-4">
-            <p className="text-sm text-gray-600">Receipt Number</p>
-            <p className="font-mono font-bold text-lg">{data.receipt_number}</p>
+
+          {/* Receipt Number */}
+          <div className="bg-gray-50 p-4 rounded mb-6">
+            <p className="text-sm text-gray-500 mb-1">Receipt Number</p>
+            <p className="font-mono font-bold text-lg tracking-wider">{data.receipt_number}</p>
           </div>
-          <button
-            onClick={onClose}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Close
-          </button>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-3">
+            {/* Download Receipt — primary CTA */}
+            <button
+              onClick={downloadReceipt}
+              disabled={downloading}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed font-semibold transition-colors"
+            >
+              {downloading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a1 1 0 001 1h16a1 1 0 001-1v-3"/>
+                  </svg>
+                  Download Receipt (PDF)
+                </>
+              )}
+            </button>
+
+            {/* Close */}
+            <button
+              onClick={onClose}
+              className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -342,13 +372,12 @@ const SuccessModal = ({ data, onClose }) => {
 };
 
 
-
-// Main Student Fee Management Component
+// ── Main Component ────────────────────────────────────────────────────────────
 export default function StudentFeeManagement() {
   const [selectedBill, setSelectedBill] = useState(null);
-  const [showPayment, setShowPayment] = useState(false);
-  const [successData, setSuccessData] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [showPayment, setShowPayment]   = useState(false);
+  const [successData, setSuccessData]   = useState(null);
+  const [refreshKey, setRefreshKey]     = useState(0);
 
   const handlePayBill = (bill) => {
     setSelectedBill(bill);
@@ -364,7 +393,7 @@ export default function StudentFeeManagement() {
     setShowPayment(false);
     setSelectedBill(null);
     setSuccessData(data);
-    setRefreshKey(prev => prev + 1); // Refresh the bills list
+    setRefreshKey(prev => prev + 1);
   };
 
   const handleCloseSuccess = () => {

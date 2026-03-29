@@ -11,7 +11,8 @@ import {
   Backpack,
   ClipboardCheck,
   GraduationCap,
-  CreditCard 
+  CreditCard,
+  Video,
 } from "lucide-react";
 
 export default function StudentSidebar() {
@@ -158,7 +159,7 @@ export default function StudentSidebar() {
             }`
           }
         >
-          <CreditCard  size={20} />
+          <Video  size={20} />
           <span>Class Meetings</span>
         </NavLink>
 

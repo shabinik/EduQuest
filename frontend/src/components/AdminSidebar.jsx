@@ -14,7 +14,8 @@ import {
   LogOut,
   BookOpen,
   Wallet,
-  Receipt 
+  Receipt,
+  Video 
 } from "lucide-react";
 
 export default function AdminSidebar() {
@@ -189,7 +190,7 @@ export default function AdminSidebar() {
             }`
           }
         >
-          <Receipt  size={20} />
+          <Video  size={20} />
           <span>Staff Meetings</span>
         </NavLink>
 

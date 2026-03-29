@@ -11,7 +11,8 @@ import {
   LogOut,
   BookOpen,
   ClipboardCheck,
-  GraduationCap 
+  GraduationCap,
+  Video
 } from "lucide-react";
 
 export default function TeacherSidebar() {
@@ -144,7 +145,7 @@ export default function TeacherSidebar() {
             }`
           }
         >
-          <FileText size={20} />
+          <Video size={20} />
           <span>Meetings</span>
         </NavLink>
 
