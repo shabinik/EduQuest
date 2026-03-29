@@ -5,6 +5,7 @@ from .views import (LoginView,LogoutView,ProfileView,
                     AdminProfileView,AdminResendOtpView,
                     ForgotPasswordView,ResetPasswordView,
                     ForgotPasswordResendOtpView,
+                    AdminDashboardView
 )
 
 urlpatterns = [
@@ -20,6 +21,7 @@ urlpatterns = [
     path("forgot-password/", ForgotPasswordView.as_view(),name="forgot-password"),
     path("reset-password/", ResetPasswordView.as_view(),name="reset-password"),
     path("forgot/resend-otp/",ForgotPasswordResendOtpView.as_view(),name="forgot-resend-otp"),
+    path("admin/dashboard/", AdminDashboardView.as_view()),
 ]
 
 
