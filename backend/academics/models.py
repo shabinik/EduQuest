@@ -127,3 +127,34 @@ class MonthlyAttendanceSummary(models.Model):
 
     def __str__(self):
         return f"{self.student} - {self.month}/{self.year}"
+
+
+
+class LeaveRequest(models.Model):
+    STATUS_CHOICES = [
+        ("pending",  "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+    tenant  = models.ForeignKey("accounts.Tenant",  on_delete=models.CASCADE, related_name="leave_requests")
+    student = models.ForeignKey("users.Student",     on_delete=models.CASCADE, related_name="leave_requests")
+    from_date   = models.DateField()
+    to_date     = models.DateField()
+    reason      = models.TextField()
+    status      = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
+
+    reviewed_by     = models.ForeignKey("users.Teacher", on_delete=models.SET_NULL, null=True, blank=True, related_name="reviewed_leave_requests")
+    teacher_remark  = models.TextField(blank=True)
+    reviewed_at     = models.DateTimeField(null=True, blank=True) 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+ 
+    class Meta:
+        ordering = ["-created_at"]
+ 
+    def __str__(self):
+        return f"{self.student} | {self.from_date} – {self.to_date} | {self.status}"
+ 
+    @property
+    def days_count(self):
+        return (self.to_date - self.from_date).days + 1

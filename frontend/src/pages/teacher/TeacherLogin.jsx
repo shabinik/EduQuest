@@ -37,7 +37,7 @@ function TeacherLogin() {
             if (user.must_change_password) {
               navigate('/teacher/change-password')
             } else {
-              navigate('/teacher/profile')
+              navigate('/teacher')
             }
             
         } catch (err) {

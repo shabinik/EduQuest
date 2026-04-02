@@ -1,7 +1,8 @@
 from django.urls import path
 from . views import (CreateAnnouncement,AdminAnnouncementUpdateDeleteView,AnnouncementAudienceView,AdminAnnouncementList,
                     TeacherAttendanceListView,TeacherMarkAttendanceView,TeacherGetClassStudentsView,TeacherAttendanceDetailView,
-                    StudentAttendanceView,StudentMonthlyReportView )
+                    StudentAttendanceView,StudentMonthlyReportView,
+                    StudentLeaveRequestListCreateView,StudentLeaveRequestCancelView,TeacherLeaveRequestListView,TeacherLeaveReviewView )
 
 urlpatterns = [
     path('create/announcement/',CreateAnnouncement.as_view()),
@@ -16,4 +17,9 @@ urlpatterns = [
     
     path('student/attendance/', StudentAttendanceView.as_view(), name='student-attendance'),
     path('student/attendance/monthly/', StudentMonthlyReportView.as_view(), name='student-monthly-report'),
+
+    path("student/leave/", StudentLeaveRequestListCreateView.as_view()),
+    path("student/leave/<int:pk>/", StudentLeaveRequestCancelView.as_view()),
+    path("teacher/leave/", TeacherLeaveRequestListView.as_view()),
+    path("teacher/leave/<int:pk>/review/", TeacherLeaveReviewView.as_view()),
 ]

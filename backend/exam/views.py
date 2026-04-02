@@ -96,7 +96,7 @@ class StudentExamListView(generics.ListAPIView):
         return Exam.objects.filter(
             tenant = self.request.user.tenant,
             classes = student.school_class
-        ).prefetch_related('classes','subject').order_by('-exam_date')
+        ).prefetch_related('classes','subject').order_by('-created_at')
     
 
 class StudentExamResultsView(generics.ListAPIView):

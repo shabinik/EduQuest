@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from . models import Announcement
 from django.utils.timezone import now
-from . models import Announcement, StudentDailyAttendance,ClassDailyAttendance,MonthlyAttendanceSummary
+from . models import Announcement, StudentDailyAttendance,ClassDailyAttendance,MonthlyAttendanceSummary,LeaveRequest
 
 class AnnouncementSerializer(serializers.ModelSerializer):
     is_active = serializers.SerializerMethodField()
@@ -143,4 +143,41 @@ class MonthlyAttendanceSummarySerializer(serializers.ModelSerializer):
 
         read_only_fields = ['last_calculated_at']
 
-        
+
+
+class LeaveRequestSerializer(serializers.ModelSerializer):
+    student_name  = serializers.CharField(source="student.user.full_name",    read_only=True)
+    roll_number   = serializers.CharField(source="student.roll_number",        read_only=True)
+    class_name    = serializers.CharField(source="student.school_class.__str__", read_only=True)
+    days_count    = serializers.ReadOnlyField()
+    reviewed_by_name = serializers.CharField(source="reviewed_by.user.full_name", read_only=True, default=None)
+ 
+    class Meta:
+        model  = LeaveRequest
+        fields = [
+            "id", "student_name", "roll_number", "class_name",
+            "from_date", "to_date", "days_count", "reason",
+            "status", "teacher_remark", "reviewed_by_name", "reviewed_at",
+            "created_at",
+        ]
+        read_only_fields = ["id", "status", "teacher_remark", "reviewed_by_name", "reviewed_at", "created_at"]
+ 
+ 
+class LeaveRequestCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = LeaveRequest
+        fields = ["from_date", "to_date", "reason"]
+ 
+    def validate(self, data):
+        from django.utils import timezone
+        if data["from_date"] > data["to_date"]:
+            raise serializers.ValidationError("From date must be before or equal to To date.")
+        if data["from_date"] < timezone.now().date():
+            raise serializers.ValidationError("Leave cannot be requested for past dates.")
+        return data
+ 
+ 
+class LeaveReviewSerializer(serializers.Serializer):
+    status         = serializers.ChoiceField(choices=["approved", "rejected"])
+    teacher_remark = serializers.CharField(required=True, allow_blank=False)
+ 

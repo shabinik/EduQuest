@@ -4,8 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from accounts.permissions import HasActiveSubscription
 from . models import AIChatMessage
 from django.conf import settings
-from google import genai
-from google.genai import errors as genai_errors
+from groq import Groq
+import os
 
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
@@ -15,7 +15,7 @@ from .models import Meeting
 from .serializers import MeetingSerializer, MeetingListSerializer
 from accounts.permissions import IsAdmin,IsTeacher, HasActiveSubscription
 
-client = genai.Client(api_key=settings.GEMINI_API_KEY)
+groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 # Create your views here.
 
@@ -43,32 +43,37 @@ class StudentAIChatView(APIView):
             student = student
         ).order_by("-created_at")[:10][::-1]
 
-        chat_history = ""
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    f"You are a helpful AI tutor for students. "
+                    f"Student name: {request.user.full_name}. "
+                    "Explain answers clearly and simply. "
+                    "If it's a math problem, solve it step by step. "
+                    "Keep responses concise and student-friendly."
+                )
+            }
+        ]
+
         for msg in history:
-            if msg.role == 'user':
-                chat_history += f"Student:{msg.content}\n"
-            else:
-                chat_history += f"AI : {msg.content}\n"
-
-        prompt = f"""
-        You are a helpful AI tutor for students.
-
-        Student Name: {request.user.full_name}
-
-        Explain answers clearly and simply.
-        If it's a math problem, solve step by step.
-
-        Conversation:
-        {chat_history}
+            messages.append({
+                "role": msg.role if msg.role == "user" else "assistant",
+                "content": msg.content
+            })
         
-        Student: {user_message}
-        AI:
-        """
-        response = client.models.generate_content(
-            model = "gemini-1.5-flash",
-            contents = prompt
-        )
-        ai_reply = response.text
+        # Call Groq API
+        try:
+            completion = groq_client.chat.completions.create(
+                model="llama-3.1-8b-instant",   
+                messages=messages,
+                max_tokens=1024,
+                temperature=0.7,
+            )
+            ai_reply = completion.choices[0].message.content
+        except Exception as e:
+            return Response({"error": f"AI service error: {str(e)}"}, status=500)
+
 
         AIChatMessage.objects.create(
             student = student,

@@ -2,11 +2,11 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from accounts.permissions import IsAdmin,IsTeacher,HasActiveSubscription
-from . serializers import AnnouncementSerializer,ClassDailyAttendanceSerializer,StudentDailyAttendanceSerializer,AttendanceMarkSerializer,MonthlyAttendanceSummarySerializer
+from . serializers import AnnouncementSerializer,ClassDailyAttendanceSerializer,StudentDailyAttendanceSerializer,AttendanceMarkSerializer,MonthlyAttendanceSummarySerializer,LeaveRequestSerializer,LeaveRequestCreateSerializer,LeaveReviewSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
-from . models import Announcement,StudentDailyAttendance,ClassDailyAttendance,MonthlyAttendanceSummary
+from . models import Announcement,StudentDailyAttendance,ClassDailyAttendance,MonthlyAttendanceSummary,LeaveRequest
 from rest_framework import generics 
 from django.db import transaction
 from datetime import datetime, timedelta
@@ -349,3 +349,88 @@ class StudentMonthlyReportView(generics.ListAPIView):
         return MonthlyAttendanceSummary.objects.filter(
             student = self.request.user.student_profile
         ).order_by('-year', '-month')
+    
+
+# ----------- Student Leave Request-----------------
+
+class StudentLeaveRequestListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated, HasActiveSubscription]
+ 
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return LeaveRequestCreateSerializer
+        return LeaveRequestSerializer
+ 
+    def get_queryset(self):
+        return LeaveRequest.objects.filter(
+            student=self.request.user.student_profile,
+            tenant=self.request.user.tenant,
+        )
+ 
+    def perform_create(self, serializer):
+        serializer.save(
+            student=self.request.user.student_profile,
+            tenant=self.request.user.tenant,
+        )
+ 
+ 
+# ── Student: cancel a pending request ────────────────────────────────────────
+class StudentLeaveRequestCancelView(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated, HasActiveSubscription]
+ 
+    def get_queryset(self):
+        return LeaveRequest.objects.filter(
+            student=self.request.user.student_profile,
+            tenant=self.request.user.tenant,
+            status="pending",          # can only cancel pending ones
+        )
+ 
+ 
+class TeacherLeaveRequestListView(generics.ListAPIView):
+    serializer_class   = LeaveRequestSerializer
+    permission_classes = [IsAuthenticated, IsTeacher, HasActiveSubscription]
+ 
+    def get_queryset(self):
+        teacher = self.request.user.teacher_profile
+        qs = LeaveRequest.objects.filter(
+            tenant=self.request.user.tenant,
+            student__school_class__class_teacher=teacher,
+        ).select_related("student__user", "student__school_class", "reviewed_by__user")
+ 
+        status_filter = self.request.query_params.get("status")
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+ 
+        return qs.order_by("-created_at")
+ 
+ 
+# ── Teacher: approve or reject ──
+class TeacherLeaveReviewView(generics.GenericAPIView):
+    serializer_class   = LeaveReviewSerializer
+    permission_classes = [IsAuthenticated, IsTeacher, HasActiveSubscription]
+ 
+    def post(self, request, pk):
+        teacher = request.user.teacher_profile
+ 
+        leave = get_object_or_404(
+            LeaveRequest,
+            pk=pk,
+            tenant=request.user.tenant,
+            student__school_class__class_teacher=teacher,
+            status="pending",          # can only review pending
+        )
+ 
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+ 
+        leave.status        = serializer.validated_data["status"]
+        leave.teacher_remark = serializer.validated_data["teacher_remark"]
+        leave.reviewed_by   = teacher
+        leave.reviewed_at   = timezone.now()
+        leave.save()
+ 
+        return Response(
+            LeaveRequestSerializer(leave).data,
+            status=status.HTTP_200_OK,
+        )
+ 
