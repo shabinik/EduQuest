@@ -66,7 +66,7 @@ class LoginView(APIView):
             httponly=True,
             secure=False,    #True in production
             samesite='Lax',
-            domain="localhost",
+            # domain="localhost",
             path='/',
             max_age= 60 * 60 * 24 * 30, #30 days
         )
@@ -77,7 +77,7 @@ class LoginView(APIView):
             httponly=True,
             secure=False,
             samesite='Lax',
-            domain="localhost",
+            # domain="localhost",
             path='/',
             max_age= 60 * 60 * 24 * 60, # 60 days
         )

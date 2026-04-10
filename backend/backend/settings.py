@@ -39,6 +39,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
+    'channels',
     'accounts',
     'subscription',
     'users',
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     'exam',
     'finance',
     'chatvideo',
+    'notifications',
     'cloudinary',
     'cloudinary_storage',
     "rest_framework_simplejwt.token_blacklist",
@@ -112,6 +114,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+
+ASGI_APPLICATION = "backend.asgi.application"
 
 
 # Database
@@ -179,6 +183,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+}
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
 
 

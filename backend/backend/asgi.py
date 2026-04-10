@@ -8,9 +8,24 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 """
 
 import os
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
+
+django.setup()
 
 from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter,URLRouter
+from notifications.middleware import JWTCookieMiddleware
+import notifications.routing
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
-application = get_asgi_application()
+
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": JWTCookieMiddleware(
+        URLRouter(
+            notifications.routing.websocket_urlpatterns
+        )
+    ),
+})

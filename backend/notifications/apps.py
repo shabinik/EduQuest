@@ -1,0 +1,20 @@
+# from django.apps import AppConfig
+
+
+# class NotificationsConfig(AppConfig):
+#     default_auto_field = 'django.db.models.BigAutoField'
+#     name = 'notifications'
+
+#     def ready(self):
+#         import notifications.signals
+
+
+from django.apps import AppConfig
+
+class NotificationsConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'notifications'
+
+    def ready(self):
+        import notifications.signals
+        notifications.signals.connect_m2m_signals()  # ← add this
