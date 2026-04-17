@@ -150,7 +150,7 @@ class StudentListView(APIView):
 
     def get(self,request):
         tenant = request.user.tenant
-        students = Student.objects.filter(user__tenant = tenant)
+        students = Student.objects.filter(user__tenant = tenant).order_by("-created_at")
         serializer = StudentListSerializer(students,many=True)
         return Response(serializer.data)
     

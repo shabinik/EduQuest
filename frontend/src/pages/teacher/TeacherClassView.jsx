@@ -99,22 +99,35 @@ const StudentDetailModal = ({ studentId, onClose }) => {
   );
 };
 
-
-// ── Main Component ────────────────────────────────────────────────────────────
 export default function TeacherClassView() {
   const [cls, setCls] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalStudents, setTotalStudents] = useState(0);
 
+  // ── Fetch whenever page changes ──────────────────────────────────────────
   useEffect(() => {
+    setLoading(true);
     axiosInstance
-      .get("classroom/teacher/class/")
-      .then((res) => setCls(res.data))
+      .get(`classroom/teacher/class/?page=${currentPage}`)
+      .then((res) => {
+        setCls(res.data);
+        setTotalPages(res.data.total_pages);
+        setTotalStudents(res.data.student_count);
+      })
       .catch(() => toast.error("No class assigned. Please contact admin."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [currentPage]); // re-fetch on page change
 
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // Client-side search on the current page's students
   const filteredStudents = cls?.students?.filter((student) => {
     const name       = student.name || "";
     const email      = student.email || "";
@@ -179,7 +192,7 @@ export default function TeacherClassView() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-500 uppercase mb-2">Total Students</p>
-              <p className="text-4xl font-bold text-emerald-600">{cls.student_count || 0}</p>
+              <p className="text-4xl font-bold text-emerald-600">{totalStudents || 0}</p>
               <p className="text-sm text-gray-600 mt-1">Enrolled in your class</p>
             </div>
             <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center text-2xl">👥</div>
@@ -219,10 +232,10 @@ export default function TeacherClassView() {
                 <span className="text-2xl mr-2">👨‍🎓</span> Student List
               </h2>
               <p className="text-sm text-gray-500 mt-1">
-                {cls.students?.length || 0} student{cls.students?.length !== 1 ? "s" : ""} in your class
+                {totalStudents || 0} student{totalStudents !== 1 ? "s" : ""} in your class
               </p>
             </div>
-            {cls.students && cls.students.length > 0 && (
+            {totalStudents > 0 && (
               <div className="w-full md:w-96">
                 <div className="relative">
                   <input
@@ -252,59 +265,104 @@ export default function TeacherClassView() {
             <p className="text-gray-400 text-sm mt-1">Try adjusting your search terms</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">Roll No</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Student Name</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email Address</th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">Details</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredStudents.map((s, index) => (
-                  <tr key={s.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-center">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700">
-                        {s.roll_number}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
-                          {s.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-800">{s.name}</p>
-                          <p className="text-xs text-gray-500">Student #{index + 1}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-gray-600 text-sm flex items-center">
-                        <span className="mr-2">📧</span>{s.email}
-                      </p>
-                    </td>
-                    {/* ── View Details Button ── */}
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => setSelectedStudentId(s.id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-medium rounded-lg border border-emerald-200 transition-colors"
-                      >
-                        👁 View
-                      </button>
-                    </td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">Roll No</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Student Name</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email Address</th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">Details</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredStudents.map((s, index) => (
+                    <tr key={s.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 text-center">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700">
+                          {s.roll_number}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
+                            {s.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-800">{s.name}</p>
+                            <p className="text-xs text-gray-500">
+                              Student #{(currentPage - 1) * 6 + index + 1}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-gray-600 text-sm flex items-center">
+                          <span className="mr-2">📧</span>{s.email}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => setSelectedStudentId(s.id)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-medium rounded-lg border border-emerald-200 transition-colors"
+                        >
+                          👁 View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* ── Pagination Controls ── */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <p className="text-sm text-gray-500">
+                  Page <span className="font-semibold text-gray-700">{currentPage}</span> of{" "}
+                  <span className="font-semibold text-gray-700">{totalPages}</span> —{" "}
+                  <span className="font-semibold text-gray-700">{totalStudents}</span> students total
+                </p>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  >
+                    ← Prev
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-9 h-9 rounded-lg text-sm font-semibold transition ${
+                        page === currentPage
+                          ? "bg-emerald-600 text-white shadow-md"
+                          : "border border-gray-300 text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
       {/* CLASS OVERVIEW */}
-      {cls.students && cls.students.length > 0 && (
+      {totalStudents > 0 && (
         <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-6 border border-emerald-100">
           <h3 className="font-semibold text-gray-800 mb-4 flex items-center text-lg">
             <span className="mr-2">📊</span> Class Overview
@@ -313,11 +371,13 @@ export default function TeacherClassView() {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Total Students:</span>
-                <span className="font-semibold text-gray-800">{cls.student_count}</span>
+                <span className="font-semibold text-gray-800">{totalStudents}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Currently Viewing:</span>
-                <span className="font-semibold text-gray-800">{filteredStudents.length} student{filteredStudents.length !== 1 ? "s" : ""}</span>
+                <span className="font-semibold text-gray-800">
+                  {filteredStudents.length} student{filteredStudents.length !== 1 ? "s" : ""}
+                </span>
               </div>
             </div>
             <div className="space-y-2">

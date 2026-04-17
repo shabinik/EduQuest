@@ -167,12 +167,23 @@ class TeacherClassView(APIView):
         if not school_class:
             return Response({"details":"No class assigned"},status=404)
         
+        #pagination
+        page = int(request.query_params.get("page",1))
+        page_size = 6
+        students = list(school_class.students.all())
+        total = len(students)
+        start = (page - 1) * page_size
+        end = start + page_size
+        page_students = students[start:end]
+        
         return Response({
              "id": school_class.id,
             "name": school_class.name,
             "division": school_class.division,
             "academic_year": school_class.academic_year,
             "student_count": school_class.students.count(),
+            "total_pages":(total + page_size - 1) // page_size,
+            "current_page": page,
             "students": [
                 {
                     "id": s.id,
@@ -180,7 +191,7 @@ class TeacherClassView(APIView):
                     "roll_number": s.roll_number,
                     "email": s.user.email
                 }
-                for s in school_class.students.all()
+                for s in page_students
             ]
          })
     
