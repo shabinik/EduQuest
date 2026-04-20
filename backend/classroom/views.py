@@ -169,7 +169,7 @@ class TeacherClassView(APIView):
         
         #pagination
         page = int(request.query_params.get("page",1))
-        page_size = 6
+        page_size = 3
         students = list(school_class.students.all())
         total = len(students)
         start = (page - 1) * page_size
